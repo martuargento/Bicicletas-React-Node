@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY || 'django-insecure-profesional-1234567890';
+const SECRET_KEY = process.env.JWT_SECRET_KEY || 'bicileal-node-secret-dev';
 
 function generateTokens(user) {
   const payload = { id: user.id, username: user.username, email: user.email };

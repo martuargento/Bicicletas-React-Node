@@ -1,4 +1,4 @@
-const { products } = require('../data/storage');
+const { prisma } = require('../lib/prisma');
 
 function serializeProducto(producto) {
   return {
@@ -12,11 +12,15 @@ function serializeProducto(producto) {
   };
 }
 
-function listProducts(req, res) {
-  return res.json(products.slice().sort((a, b) => b.id - a.id).map(serializeProducto));
+async function listProducts(req, res) {
+  const productos = await prisma.producto.findMany({
+    orderBy: { id: 'desc' },
+  });
+
+  return res.json(productos.map(serializeProducto));
 }
 
-function createProduct(req, res) {
+async function createProduct(req, res) {
   const nombre = String(req.body.nombre || '').trim();
   const descripcion = String(req.body.descripcion || '');
   const precio = Number(req.body.precio || 0);
@@ -43,30 +47,32 @@ function createProduct(req, res) {
     });
   }
 
-  const producto = {
-    id: Date.now(),
-    nombre,
-    descripcion,
-    precio: Number(precio).toFixed(2),
-    stock: Number(stock),
-    imagen: req.file ? `/media/bicicletas/${req.file.filename}` : null,
-    creado_en: new Date().toISOString(),
-  };
+  const producto = await prisma.producto.create({
+    data: {
+      nombre,
+      descripcion,
+      precio: Number(precio),
+      stock: Number(stock),
+      imagen: req.file ? `/media/bicicletas/${req.file.filename}` : null,
+    },
+  });
 
-  products.push(producto);
   return res.status(201).json(serializeProducto(producto));
 }
 
-function updateProduct(req, res) {
-  const producto = products.find((item) => item.id === Number(req.params.id));
-  if (!producto) {
+async function updateProduct(req, res) {
+  const productoExistente = await prisma.producto.findUnique({
+    where: { id: Number(req.params.id) },
+  });
+
+  if (!productoExistente) {
     return res.status(404).json({ error: 'Producto no encontrado.' });
   }
 
-  const nombre = req.body.nombre !== undefined ? String(req.body.nombre).trim() : producto.nombre;
-  const descripcion = req.body.descripcion !== undefined ? String(req.body.descripcion || '') : producto.descripcion;
-  const precio = req.body.precio !== undefined ? Number(req.body.precio) : Number(producto.precio);
-  const stock = req.body.stock !== undefined ? Number(req.body.stock) : Number(producto.stock);
+  const nombre = req.body.nombre !== undefined ? String(req.body.nombre).trim() : productoExistente.nombre;
+  const descripcion = req.body.descripcion !== undefined ? String(req.body.descripcion || '') : productoExistente.descripcion;
+  const precio = req.body.precio !== undefined ? Number(req.body.precio) : Number(productoExistente.precio);
+  const stock = req.body.stock !== undefined ? Number(req.body.stock) : Number(productoExistente.stock);
 
   if (!nombre) {
     return res.status(400).json({
@@ -89,58 +95,67 @@ function updateProduct(req, res) {
     });
   }
 
-  producto.nombre = nombre;
-  producto.descripcion = descripcion;
-  producto.precio = Number(precio).toFixed(2);
-  producto.stock = Number(stock);
-
-  if (req.file) {
-    producto.imagen = `/media/bicicletas/${req.file.filename}`;
-  }
+  const producto = await prisma.producto.update({
+    where: { id: Number(req.params.id) },
+    data: {
+      nombre,
+      descripcion,
+      precio: Number(precio),
+      stock: Number(stock),
+      imagen: req.file ? `/media/bicicletas/${req.file.filename}` : productoExistente.imagen,
+    },
+  });
 
   return res.json(serializeProducto(producto));
 }
 
-function deleteProduct(req, res) {
-  const index = products.findIndex((item) => item.id === Number(req.params.id));
-  if (index === -1) {
+async function deleteProduct(req, res) {
+  const productoExistente = await prisma.producto.findUnique({
+    where: { id: Number(req.params.id) },
+  });
+
+  if (!productoExistente) {
     return res.status(404).json({ error: 'Producto no encontrado.' });
   }
 
-  products.splice(index, 1);
+  await prisma.producto.delete({
+    where: { id: Number(req.params.id) },
+  });
+
   return res.status(200).json({ mensaje: 'Producto eliminado.' });
 }
 
-function listPedidos(req, res) {
-  const { pedidos } = require('../data/storage');
-  const usuarioPedidos = pedidos.filter((pedido) => pedido.usuario === req.user.id).sort((a, b) => b.id - a.id);
-  return res.json(usuarioPedidos.map((pedido) => ({
+async function listPedidos(req, res) {
+  const pedidos = await prisma.pedido.findMany({
+    where: { usuarioId: req.user.id },
+    orderBy: { id: 'desc' },
+  });
+
+  return res.json(pedidos.map((pedido) => ({
     id: pedido.id,
-    usuario: pedido.usuario,
+    usuario: pedido.usuarioId,
     total: Number(pedido.total).toFixed(2),
     creado_en: pedido.creado_en,
   })));
 }
 
-function createPedido(req, res) {
-  const { pedidos } = require('../data/storage');
+async function createPedido(req, res) {
   const total = Number(req.body.total || 0);
 
   if (total < 0) {
     return res.status(400).json({ error: 'El total no puede ser negativo.' });
   }
 
-  const pedido = {
-    id: Date.now(),
-    usuario: req.user.id,
-    total: Number(total).toFixed(2),
-    creado_en: new Date().toISOString(),
-  };
+  const pedido = await prisma.pedido.create({
+    data: {
+      usuarioId: req.user.id,
+      total: Number(total),
+    },
+  });
 
-  pedidos.push(pedido);
   return res.status(201).json({
     id: pedido.id,
-    usuario: pedido.usuario,
+    usuario: pedido.usuarioId,
     total: Number(pedido.total).toFixed(2),
     creado_en: pedido.creado_en,
   });

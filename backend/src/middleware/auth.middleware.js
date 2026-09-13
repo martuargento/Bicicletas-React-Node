@@ -1,7 +1,7 @@
-const { users } = require('../data/storage');
 const { verifyToken } = require('../data/auth');
+const { prisma } = require('../lib/prisma');
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
@@ -11,16 +11,18 @@ function authMiddleware(req, res, next) {
 
   try {
     const decoded = verifyToken(token);
-    const user = users.find((item) => item.id === decoded.id);
+    const user = await prisma.user.findUnique({
+      where: { id: Number(decoded.id) },
+    });
 
     if (!user) {
-      return res.status(401).json({ error: 'Usuario no encontrado.' });
+      return res.status(401).json({ error: 'Usuario no válido.' });
     }
 
     req.user = user;
     return next();
   } catch (error) {
-    return res.status(401).json({ error: 'Token inválido.' });
+    return res.status(401).json({ error: 'Token inválido o expirado.' });
   }
 }
 

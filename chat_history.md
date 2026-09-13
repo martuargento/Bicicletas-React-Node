@@ -1817,3 +1817,318 @@ Tambien se puede agregar esto en `settings.json`:
 ```
 
 Eso solamente oculta los colores; no borra ni revierte ningun archivo. Los cambios siguen existiendo en Git.
+
+---
+
+## Actualización final de contexto del proyecto (2026-09-13)
+
+### 1) Qué aprendimos de Node en tus clases y qué tenía valor real
+
+Lo que vos ya viste en Node no era “basura” ni irrelevante. Tenía una base útil, pero estaba centrada más en entender flujo, estructura y lógica de aplicación que en construir un backend profesional.
+
+Conceptos útiles que ya vimos y que sí valen:
+
+- Express como servidor HTTP
+- `app.get()`, `app.post()`, `app.put()`, `app.delete()`
+- rutas por recurso
+- `req` y `res`
+- `express.json()` para leer JSON del cliente
+- middleware básico
+- manejo de formularios y body parsing
+- autenticación simple con sesiones o tokens simulados
+- consumo de APIs desde frontend con `fetch` o `axios`
+- CRUD con listas en memoria
+- flujo de frontend hacia backend y viceversa
+- división inicial de lógica en rutas, controladores y helpers
+
+Lo que faltaba para que esto se convierta en una base profesional era esto:
+
+- persistencia real en base de datos
+- ORM real para manejar datos sin arrays en memoria
+- validación real de inputs
+- hashing seguro de contraseñas
+- JWT real con expiración
+- middleware de autenticación real
+- separación clara de responsabilidades
+- archivos de configuración y variables de entorno
+- una estructura que pueda escalar sin volverse un caos
+
+Es decir: vos ya habías aprendido la parte del “cómo se mueve la información”, pero no todavía la parte del “cómo se guarda y protege en un backend real”.
+
+---
+
+### 2) Qué estructura final quedó como base buena para estudiar y reutilizar
+
+El proyecto actual quedó con una arquitectura simple, ordenada y moderna sin hacer una “arquitectura enterprise” innecesaria.
+
+#### Backend actual
+
+```text
+backend/
+├── package.json
+├── server.js
+├── .env
+├── prisma/
+│   ├── schema.prisma
+│   └── dev.db
+├── media/
+│   └── bicicletas/
+├── src/
+│   ├── config/
+│   │   └── app.js
+│   ├── controllers/
+│   │   ├── auth.controller.js
+│   │   └── product.controller.js
+│   ├── data/
+│   │   ├── auth.js
+│   │   ├── seed.js
+│   │   └── storage.js
+│   ├── lib/
+│   │   └── prisma.js
+│   ├── middleware/
+│   │   └── auth.middleware.js
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   └── products.routes.js
+│   └── prisma/
+│       └── schema.prisma
+```
+
+#### Qué hace cada pieza
+
+- `server.js`: arranca la app, carga dotenv, inicializa seed y levanta el servidor
+- `src/config/app.js`: configura Express, CORS, JSON, archivos estáticos, rutas globales
+- `src/routes/auth.routes.js`: define endpoints de registro, login y perfil
+- `src/routes/products.routes.js`: define CRUD de productos y pedidos
+- `src/controllers/auth.controller.js`: lógica de registro, login y perfil
+- `src/controllers/product.controller.js`: lógica para listar, crear, editar, borrar y pedidos
+- `src/middleware/auth.middleware.js`: valida JWT y carga usuario autenticado
+- `src/data/auth.js`: genera y verifica tokens JWT
+- `src/data/seed.js`: crea usuario admin y productos base para arrancar el proyecto
+- `src/lib/prisma.js`: instancia centralizada del cliente Prisma
+- `prisma/schema.prisma`: esquema de base de datos
+- `media/`: imágenes y recursos de productos
+
+Esto es una estructura clara, profesional y didáctica, sin estar sobre-abstracta ni “arquitectura de empresa” por capricho.
+
+---
+
+### 3) Qué es lo que ya quedó funcionando real y verificado
+
+Validaciones realizadas con salida real:
+
+```text
+login 200
+profile 200
+create 201
+```
+
+Eso significa que el flujo real quedó operativo:
+
+- login devuelve token válido
+- perfil protegido responde con usuario autenticado
+- crear producto con JWT responde 201
+
+Además, el servidor levantó correctamente con:
+
+```text
+Node backend escuchando en http://localhost:8000
+```
+
+Y el error `EADDRINUSE` se resolvió liberando el puerto 8000 que estaba ocupado por una instancia anterior.
+
+---
+
+### 4) Cómo está hecho el proyecto de React + Django de referencia
+
+Esta parte quedó como referencia histórica y conceptual para que el proyecto quede entendible desde otra PC.
+
+#### Estructura del Django viejo
+
+```text
+Django_2_de _cero/
+├── manage.py
+├── db.sqlite3
+├── requirements.txt
+├── media/
+├── bicicletas/
+│   ├── models.py
+│   ├── views.py
+│   ├── admin.py
+│   └── templates/
+├── contactanos/
+│   ├── forms.py
+│   ├── models.py
+│   ├── views.py
+│   └── templates/
+├── tienda_bicileal/
+│   ├── views.py
+│   ├── models.py
+│   └── templates/
+├── django_config/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+└── env/
+```
+
+#### Qué hacía cada parte
+
+- `django_config/settings.py`: configuración general del proyecto
+- `django_config/urls.py`: define rutas principales del sitio
+- `bicicletas/models.py`: modelo `Bicicleta`
+- `bicicletas/views.py`: vista `Portada` que consulta modelos y renderiza HTML
+- `contactanos/forms.py`: formulario para mensaje de contacto
+- `contactanos/models.py`: modelo `ContactoMensaje`
+- `contactanos/views.py`: guardado de mensajes y manejo del formulario
+- `tienda_bicileal/views.py`: páginas como Nuestra historia y datos comprador
+- templates HTML: renderizado con Django templates y contexto de Python
+
+#### Diferencia clave respecto al backend actual
+
+El proyecto viejo era un Django monolítico con renderizado de HTML.
+
+Eso significa:
+
+- Django devuelve página HTML
+- frontend y backend estaban mezclados en la misma app
+- no había una API REST real
+- no había React consumiendo JSON
+- no había JWT ni CORS
+- no había autenticación real desde el frontend
+
+En cambio, el proyecto de Node actual tiene una separación clara:
+
+- frontend React
+- backend API en Express
+- base de datos real con Prisma/SQLite
+- JWT autenticación
+- CORS para comunicación entre puertos
+- JSON como formato de intercambio
+
+---
+
+### 5) Cómo estaba hecho el React de las clases
+
+Tu curso de React ya te dio una base muy útil para la parte visual y la lógica del cliente.
+
+#### Lo que ya tenías dominado
+
+- componentes
+- props
+- state
+- formularios
+- mapas de renderizado
+- autenticación local con contexto
+- rutas protegidas
+- manejo de sesión en `localStorage`
+- CRUD local
+- fetch/async/await
+- manejo de errores
+- modales y formularios dinámicos
+- renderización con datos desde API externa
+
+#### Qué te faltaba para pasar del curso a una arquitectura real
+
+- backend real con persistencia
+- JWT real
+- serialización con JSON
+- endpoints REST
+- control de acceso por token
+- CORS
+- separación de frontend y backend
+- flujo real de login y CRUD autenticado
+
+Eso es exactamente lo que se resolvió con esta base actual.
+
+---
+
+### 6) Qué es la idea correcta para estudiar y reutilizar esto como molde
+
+La idea no es “aprender otra arquitectura después”. La idea es tomar una base que sea:
+
+- clara
+- moderna
+- simple
+- reutilizable
+- bien organizada
+- pensada para seguir creciendo sin dolor
+
+La base correcta es esta:
+
+1. Frontend React para interfaz
+2. Backend Express para API
+3. Prisma para datos
+4. SQLite para desarrollo local
+5. JWT para autenticación
+6. Middleware y rutas para separación de responsabilidades
+7. Variables de entorno para configuración
+8. Seed para iniciar con datos útiles
+
+Esto es mucho mejor como molde de estudio que una estructura gigantesca, porque te deja entender lo esencial sin perderte en capas abstractas.
+
+---
+
+### 7) Orden correcto de aprendizaje para no perderte
+
+Este es el orden que conviene seguir si querés usar este proyecto como plantilla:
+
+1. Comprender el flujo frontend -> backend -> base de datos
+2. Entender Express y sus rutas
+3. Entender controllers y middleware
+4. Entender Prisma y schema
+5. Entender JWT y autorización
+6. Entender CRUD con validación
+7. Entender React consumiendo API con axios
+8. Entender persistencia real y no arrays en memoria
+9. Entender cómo crear una nueva feature sin romper la estructura
+10. Reusar esta base para otros proyectos
+
+---
+
+### 8) Qué quedó como contexto útil para seguir desde otra PC
+
+Si mañana abris este proyecto desde otra computadora y querés seguir la conversación, este archivo debe servir como referencia global.
+
+Debe quedar claro que:
+
+- el proyecto actual se convirtió de una maqueta de Django/React a una base real con Node + Prisma + JWT
+- lo que aprendiste en clases de Node sí tuvo valor y no fue inútil
+- lo que faltaba era la capa real de persistencia y autenticación
+- la estructura actual es una buena base para seguir aprendiendo y escalando
+- el backend no está “copiado” de forma artificial: está pensado como una API funcional y bien organizada
+
+---
+
+### 9) Estado final del proyecto
+
+El proyecto está en un punto de aprendizaje sano y utilizable:
+
+- backend levantado y funcionando
+- JWT funcionando
+- registro funcionando
+- login funcionando
+- perfil protegido funcionando
+- productos cargándose desde base de datos real
+- flujo de UI funcionando con React contra backend real
+
+Este es el punto ideal para continuar aprendiendo, refactorizando y usando la base como molde para nuevos proyectos serios.
+
+---
+
+### 10) Cierre del contexto
+
+La clave del aprendizaje es esta:
+
+- no te preocupes por que “se vea igual” a la versión Django, porque la parte que importa no es el diseño visual sino la arquitectura real detrás
+- la UI puede ser igual mientras el backend cambia de una simulación a un sistema real con persistencia y seguridad
+- ahora sí tenés una base con la cual estudiar, entender y reutilizar el patrón correcto
+
+Este archivo queda como contexto completo para continuar la conversación desde otra PC sin perder el hilo de la idea principal:
+
+“aprender una base profesional, simple y reutilizable, sin sobre-ingenierizar ni saltar a otra arquitectura demasiado compleja”.
+
+---
+
+## Fin del contexto histórico y de proyecto
