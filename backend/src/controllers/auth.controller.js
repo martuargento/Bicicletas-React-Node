@@ -1,0 +1,77 @@
+const bcrypt = require('bcryptjs');
+const { users } = require('../data/storage');
+const { generateTokens } = require('../data/auth');
+
+function serializeUser(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    first_name: user.first_name || '',
+    last_name: user.last_name || '',
+  };
+}
+
+async function register(req, res) {
+  const username = String(req.body.username || '').trim();
+  const email = String(req.body.email || '').trim();
+  const password = String(req.body.password || '');
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Completa username, email y password.' });
+  }
+
+  if (users.some((user) => user.username === username)) {
+    return res.status(400).json({ error: 'Ese usuario ya existe.' });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = {
+    id: Date.now(),
+    username,
+    email,
+    password: hashedPassword,
+    first_name: '',
+    last_name: '',
+  };
+
+  users.push(newUser);
+  const tokens = generateTokens(newUser);
+
+  return res.status(201).json({
+    user: serializeUser(newUser),
+    tokens,
+  });
+}
+
+async function login(req, res) {
+  const username = String(req.body.username || '').trim();
+  const password = String(req.body.password || '');
+
+  const user = users.find((item) => item.username === username);
+  if (!user) {
+    return res.status(401).json({ error: 'Credenciales inválidas.' });
+  }
+
+  const passwordOk = await bcrypt.compare(password, user.password);
+  if (!passwordOk) {
+    return res.status(401).json({ error: 'Credenciales inválidas.' });
+  }
+
+  const tokens = generateTokens(user);
+
+  return res.status(200).json({
+    user: serializeUser(user),
+    tokens,
+  });
+}
+
+function profile(req, res) {
+  return res.json(serializeUser(req.user));
+}
+
+module.exports = {
+  register,
+  login,
+  profile,
+};
