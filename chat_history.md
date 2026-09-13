@@ -2137,6 +2137,90 @@ Este archivo queda como contexto completo para continuar la conversación desde 
 
 ## Fecha: 2026-09-13
 
+### Conversación 17
+
+#### Usuario
+PS E:\DATOS KINSTON\Practica Programacion 2026\Bicileal Front React + Backend Node\React + Node\backend> npm run dev
+
+Al ejecutar el backend aparece el error `EADDRINUSE: address already in use :::8000`.
+
+#### Asistente
+Ese error significa que el puerto 8000 ya está siendo utilizado por otro proceso, normalmente otra instancia del backend iniciada con `npm start` o `npm run dev`.
+
+No significa que Express, Prisma o la aplicación estén rotos. Significa que dos procesos intentan escuchar el mismo puerto.
+
+Para detener el servidor anterior desde su terminal se puede presionar `Ctrl + C`.
+
+También se puede localizar el proceso con:
+
+```powershell
+Get-NetTCPConnection -LocalPort 8000 -State Listen
+```
+
+Al intentar usar un pipeline directo hacia `Stop-Process`, PowerShell produjo un error de enlace porque el PID debía pasarse explícitamente mediante el parámetro `-Id`.
+
+El comando correcto es:
+
+```powershell
+Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+```
+
+Después se puede iniciar nuevamente el backend con:
+
+```powershell
+npm run dev
+```
+
+El comando busca el proceso que realmente está escuchando en el puerto 8000 y lo cierra.
+
+---
+
+### Conversación 18
+
+#### Usuario
+¿El mismo comando sirve para el puerto 5173?
+
+#### Asistente
+Sí. El puerto 5173 normalmente lo utiliza Vite para el frontend React. Para liberar ese puerto se usa el mismo patrón, cambiando únicamente el número:
+
+```powershell
+Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+```
+
+Después se puede iniciar el frontend desde la carpeta `frontend` con:
+
+```powershell
+npm run dev
+```
+
+La diferencia entre ambos puertos es:
+
+- `8000`: backend Node/Express
+- `5173`: frontend React/Vite
+
+Los dos comandos hacen lo mismo: localizar el proceso que está escuchando en el puerto indicado y cerrarlo forzosamente. Solo se debe tener presente que el comando cierra cualquier proceso que esté usando ese puerto.
+
+---
+
+### Regla práctica para este proyecto
+
+Antes de iniciar los servidores, debe existir como máximo un proceso por puerto:
+
+```text
+Backend:  localhost:8000
+Frontend: localhost:5173
+```
+
+Si aparece `EADDRINUSE`, hay una instancia anterior usando el puerto. Se puede cerrar desde su terminal con `Ctrl + C` o liberar el puerto con el comando PowerShell correspondiente.
+
+---
+
+## Fin del contexto histórico y de proyecto
+
+---
+
+## Fecha: 2026-09-13
+
 ### Conversación 16
 
 #### Usuario
