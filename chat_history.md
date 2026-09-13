@@ -2132,3 +2132,78 @@ Este archivo queda como contexto completo para continuar la conversación desde 
 ---
 
 ## Fin del contexto histórico y de proyecto
+
+---
+
+## Fecha: 2026-09-13
+
+### Conversación 16
+
+#### Usuario
+actualiza el chat
+
+#### Asistente
+Perfecto. Actualizo la conversación con la aclaración clave sobre Prisma y Express.
+
+Prisma no reemplaza a Express. Son dos capas diferentes del mismo backend.
+
+- Express es el servidor HTTP y la capa de rutas: recibe request, define endpoints, responde al cliente.
+- Prisma es el ORM: habla con la base de datos, hace queries, crea/lee/actualiza/borra registros.
+
+En Django pasa algo parecido, pero el ORM viene integrado en el framework.
+
+Es decir:
+
+- Django ya trae ORM nativo.
+- En Node, vos agregás Prisma para hacer lo mismo.
+
+Entonces, la comparación correcta es esta:
+
+- Django = framework completo con ORM incluido
+- Express = servidor web ligero
+- Prisma = ORM para Node
+
+La relación real en este proyecto es:
+
+```text
+React
+  -> Express (API)
+  -> Controller
+  -> Prisma
+  -> SQLite
+```
+
+Y no al revés.
+
+Prisma no reemplaza Express; Prisma reemplaza la parte de acceso a datos que en Django traía integrada.
+
+Es exactamente la misma función conceptual:
+
+- en Django: ORM nativo
+- en Node: Prisma como ORM externo
+
+Esto es muy importante para entender la arquitectura y para no mezclar conceptos.
+
+En otras palabras, si en Django decís “ORM”, la equivalencia en Node es “Prisma”.
+Y si en Django decís “views/routes”, la equivalencia en Node es “Express routes/controllers”.
+
+Eso deja la arquitectura así:
+
+```text
+Frontend React
+  |
+  v
+Express (routes + controllers)
+  |
+  v
+Prisma ORM
+  |
+  v
+SQLite / PostgreSQL / MySQL
+```
+
+Y esta estructura es la que se usa como base moderna y profesional para aprender backend con Node.
+
+---
+
+## Fin del contexto histórico y de proyecto
