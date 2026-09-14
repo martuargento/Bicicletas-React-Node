@@ -1,7 +1,20 @@
+//este archivo seed (semilla) prepara datos iniciales para que el proyecto pueda arrancar con:
+//un usuario administrador
+//dos productos de ejemplo
+
+//son datos iniciales que se insertan en la base de datos
+
+
+
+//Importamos una librería para convertir contraseñas en hashes seguros.
 const bcrypt = require('bcryptjs');
+
+//importamos el cliente Prisma, creado en lib --> prisma.js
+//este cliente permite consultar y modificar la base de datos
 const { prisma } = require('../lib/prisma');
 
-async function ensureSeed() {
+//esta
+async function datosIniciales() {
   const userCount = await prisma.user.count();
   if (userCount > 0) return;
 
@@ -37,10 +50,10 @@ async function ensureSeed() {
   });
 }
 
-module.exports = { ensureSeed };
+module.exports = { datosIniciales };
 
 if (require.main === module) {
-  ensureSeed()
+  datosIniciales()
     .then(() => console.log('Seed listo'))
     .catch((error) => {
       console.error('Error en seed:', error);

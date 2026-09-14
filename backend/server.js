@@ -1,12 +1,12 @@
 require('dotenv').config();
 
 const app = require('./src/config/app');
-const { ensureSeed } = require('./src/data/seed');
+const { datosIniciales } = require('./src/data/seed');
 
 const PORT = process.env.PORT || 8000;
 
 async function start() {
-  await ensureSeed();
+  await datosIniciales();
 
   app.listen(PORT, () => {
     console.log(`Node backend escuchando en http://localhost:${PORT}`);
