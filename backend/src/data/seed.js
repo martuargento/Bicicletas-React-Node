@@ -1,6 +1,8 @@
 //este archivo seed (semilla) prepara datos iniciales para que el proyecto pueda arrancar con:
 //un usuario administrador
 //dos productos de ejemplo
+//se ejecuta al iniciar el servidor backend y se fija si ya hay usuarios, si no los hay
+//crea un usuario y dos productos, como para que haya algo
 
 //son datos iniciales que se insertan en la base de datos
 
@@ -13,14 +15,18 @@ const bcrypt = require('bcryptjs');
 //este cliente permite consultar y modificar la base de datos
 const { prisma } = require('../lib/prisma');
 
-//esta
+//esta operacion asincronica va a meter esos datos iniciales en la base de datos
+//siempre de forma asincronica cuando trabajamos con una base de datos
+//ya que hay que esperar a que terminen esas operaciones, y pueden tardar
 async function datosIniciales() {
-  const userCount = await prisma.user.count();
-  if (userCount > 0) return;
+  const userCount = await prisma.user.count(); //metemos en userCount, la cantidad de usuarios que ya hay
+  if (userCount > 0) return; //si ya hay usuarios, esta funcion se corta aca y no se sigue ejecutando
 
-  const password = await bcrypt.hash('123456', 10);
+  const password = await bcrypt.hash('123456', 10); //la contraseña sera 123456, pero la encriptamos
 
-  await prisma.user.create({
+//aca creamos el usuario harcodeado, y le ponemos la contraseña
+//modelo de usuario y sus campos esta definido en prisma --> schema.prisma
+  await prisma.user.create({ 
     data: {
       username: 'admin',
       email: 'admin@bicileal.com',
@@ -30,7 +36,9 @@ async function datosIniciales() {
     },
   });
 
-  await prisma.producto.createMany({
+//aca creamos dos productos harcodeados
+//el modelo de productos y sus campos esta definido en prisma --> schema.prisma
+  await prisma.producto.createMany({ 
     data: [
       {
         nombre: 'Bicicleta Trek',
@@ -50,8 +58,16 @@ async function datosIniciales() {
   });
 }
 
-module.exports = { datosIniciales };
+//estos datos creados se guardan en la base de datos, que esta en prisma ---> dev.bd
 
+
+//exportamos la funcion esta que genera estos datos harcodeados
+//para que otros archivos puedan utilizarla
+module.exports = { datosIniciales }; 
+
+
+//esto es para usar este archivo como modulo, llamando a esta funcion desde otros archivos 
+//es lo que va a suceder en este caso, que sera llamado desde server.js
 if (require.main === module) {
   datosIniciales()
     .then(() => console.log('Seed listo'))
