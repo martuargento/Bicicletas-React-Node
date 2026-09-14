@@ -47,27 +47,97 @@ async function authMiddleware(req, res, next) {
   try {
 //verificamos el token con la funcion que definimos en data ---> auth.js
 //ahi hicimos la logica que verifica si el token es valido
-//si todo es correcto, esta funcion va a guardar el token JWT en tokenDecodificado
+//si todo es correcto, esta funcion va a guardar la informacion
+//que se guardó dentro del JWTal crearlo
+//ejemplo:
+// {
+//   id: 3,
+//   username: "martin",
+//   email: "martinalejandronuniez@gmail.com",
+//   iat: 1720000000,
+//   exp: 1720003600
+// }
+
     const tokenDecodificado = verificarToken(token);
 
-//aca me quede porque se complico esta parte, seguirla luego porque parece que el token
-//es una credencial pero tambien tiene informacion del usuario, y esa informacion
-//una vez que pasa el verificarToken, queda guardada dentro de tokenDecodificado
-//por eso aca abajo se usa tokenDecodificado.id, porque tiene como los datos del usuario
-//pero investigar mejor esta parte
-    const user = await prisma.user.findUnique({
-      where: { id: Number(tokenDecodificado.id) },
-    });
+//como que ya pasamos las validaciones anterior, ahora lo ultimo que hacemos es ver
+//si coincide el id del usuario que vino en el token,
+//con alguno de los que estan en la tabla usuario, de la base de datos
+//si es asi, traemos ese usuario, seleccionando que campos queremos extraer
+//(hacemos este de especificar los campos, para no poner el password, asi el password no viaja
+//en la req.user de la respuesta, eso mejora la seguridad)
 
+//asi que si encuentra en la tabla de usuarios, el usuario con el mismo id
+//del que tiene el token, la base de datos devuelve los datos de ese usuario
+//y lo guardamos en user
+
+//podria quedar algo asi:
+// const user = {
+//   id: 3,
+//   username: "martin",
+//   email: "martin@email.com",
+//   first_name: "Martin",
+//   last_name: "Gomez"
+// };
+
+    const user = await prisma.user.findUnique({
+    where: { id: Number(tokenDecodificado.id) },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      first_name: true,
+      last_name: true,
+    },
+  });
+
+
+  //si en la base de datos no se encuentra un usuario con el id que vino en el token
+  //va a devolver un error y user pasaria a valer null
+  //aca hacemos esa comprobacion
+  //si !user (si vale null)
+  //entonces devolvemos un error 401 como respuesta, con el mensaje "usuario no valido"
     if (!user) {
       return res.status(401).json({ error: 'Usuario no válido.' });
     }
 
+//guardamos el usuario encontrado, dentro del objeto req, que representa la peticion del cliente
+//asi que ahora dentro de la peticion del usuario, va a estar los datos del usuario en req.user
+//asi cualquier controller que se ejecute luego de pasar este middleware,
+//va a poder acceder a esos datos del usuario    
+//por ejemplo haciendo esto:
+//req.user.id    (accede al id del usuario)
+//req.user.username    (accede al nombre del usuario)
+//req.user.email    (accede al email del usuario)
     req.user = user;
+
+//como todo salio bien si llegamos hasta en cuanto a las validaciones de la peticion
+//simplemente hacemos next(), para que esta solicitud continue su camino hacia el controller
+//correspondiente que debe hacerse cargo de esta peticion de acuerdo a la ruta del endpoint
     return next();
+
+//si ocurre algun error dentro del try, pasa por aca
+//podria ser por ejemplo que el token este vencido, fue alterado, no sea valido, etc
+//aca atrapamos ese error y devolvemos como respuesta un 401,
+//con el mensaje "token invalido o expirado"
+//deteniendo la peticion, e indicando que el usuario no esta autorizado para hacerla
   } catch (error) {
     return res.status(401).json({ error: 'Token inválido o expirado.' });
   }
 }
 
+
+//aca exportamos la funcion de este middleware que hicimos
+//para que otros archivos puedan usarla
+//estos middlewares van a ser usados siempre por las rutas 
+//por ejemplo, en routes --> auth.routes.js
+
+//const authMiddleware = require('../middleware/auth.middleware');
+
+//router.get('/perfil', authMiddleware, obtenerPerfil);
+
+//vemos que el middleware se pone como segun parametro luego del endpoint
+//y como tercer parametro el controlador que se va a hacer cargo de ese endpoint
+//es decir, primero pasa por el authMiddleware, que es el que hicimos aca
+//si todo sale bien, recien ahi con el next(), se dirige la peticion a la controladora obtenerPerfil
 module.exports = authMiddleware;
