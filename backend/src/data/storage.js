@@ -1,3 +1,5 @@
+//este archivo prepara la carpeta donde se guardan las imágenes de los productos.
+
 const fs = require('fs');
 const path = require('path');
 

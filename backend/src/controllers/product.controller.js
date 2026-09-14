@@ -12,7 +12,9 @@ function serializeProducto(producto) {
   };
 }
 
-async function listProducts(req, res) {
+
+//obtener la lista de todos los productos
+async function listaDeProductos(req, res) {
   const productos = await prisma.producto.findMany({
     orderBy: { id: 'desc' },
   });
@@ -20,7 +22,9 @@ async function listProducts(req, res) {
   return res.json(productos.map(serializeProducto));
 }
 
-async function createProduct(req, res) {
+
+//crear un producto nuevo
+async function crearProducto(req, res) {
   const nombre = String(req.body.nombre || '').trim();
   const descripcion = String(req.body.descripcion || '');
   const precio = Number(req.body.precio || 0);
@@ -60,7 +64,9 @@ async function createProduct(req, res) {
   return res.status(201).json(serializeProducto(producto));
 }
 
-async function updateProduct(req, res) {
+
+//actualizar un producto
+async function actualizarProducto(req, res) {
   const productoExistente = await prisma.producto.findUnique({
     where: { id: Number(req.params.id) },
   });
@@ -109,7 +115,9 @@ async function updateProduct(req, res) {
   return res.json(serializeProducto(producto));
 }
 
-async function deleteProduct(req, res) {
+
+//borrar un producto
+async function borrarProducto(req, res) {
   const productoExistente = await prisma.producto.findUnique({
     where: { id: Number(req.params.id) },
   });
@@ -125,7 +133,9 @@ async function deleteProduct(req, res) {
   return res.status(200).json({ mensaje: 'Producto eliminado.' });
 }
 
-async function listPedidos(req, res) {
+
+//obtener la lista de todos los pedidos
+async function listaDePedidos(req, res) {
   const pedidos = await prisma.pedido.findMany({
     where: { usuarioId: req.user.id },
     orderBy: { id: 'desc' },
@@ -139,7 +149,9 @@ async function listPedidos(req, res) {
   })));
 }
 
-async function createPedido(req, res) {
+
+//crear un pedido nuevo
+async function crearPedido(req, res) {
   const total = Number(req.body.total || 0);
 
   if (total < 0) {
@@ -161,12 +173,14 @@ async function createPedido(req, res) {
   });
 }
 
+
+//exportamos estas funciones para que otros archivos puedan usarlas
 module.exports = {
-  listProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  listPedidos,
-  createPedido,
+  listaDeProductos,
+  crearProducto,
+  actualizarProducto,
+  borrarProducto,
+  listaDePedidos,
+  crearPedido,
   serializeProducto,
 };

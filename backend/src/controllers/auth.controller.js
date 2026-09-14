@@ -12,7 +12,8 @@ function serializeUser(user) {
   };
 }
 
-async function register(req, res) {
+//registrar un nuevo usuario
+async function registro(req, res) {
   const username = String(req.body.username || '').trim();
   const email = String(req.body.email || '').trim();
   const password = String(req.body.password || '');
@@ -50,6 +51,8 @@ async function register(req, res) {
   });
 }
 
+
+//loguearse
 async function login(req, res) {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
@@ -75,12 +78,15 @@ async function login(req, res) {
   });
 }
 
-function profile(req, res) {
+//perfil
+function perfil(req, res) {
   return res.json(serializeUser(req.user));
 }
 
+
+//exportamos estas funciones para que otros archivos puedan usarlas
 module.exports = {
-  register,
+  registro,
   login,
-  profile,
+  perfil,
 };

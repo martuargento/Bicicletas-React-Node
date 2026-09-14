@@ -1,3 +1,6 @@
+//para empezar hay que decir que este archivo y esta funcion que se declara es innecesaria
+//podriamos tener este proyecto sin este archivo y no habria ningun problema
+
 //este archivo seed (semilla) prepara datos iniciales para que el proyecto pueda arrancar con:
 //un usuario administrador
 //dos productos de ejemplo

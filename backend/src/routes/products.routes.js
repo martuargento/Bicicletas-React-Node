@@ -3,12 +3,12 @@ const multer = require('multer');
 const path = require('path');
 const authMiddleware = require('../middleware/auth.middleware');
 const {
-  listProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  listPedidos,
-  createPedido,
+  listaDeProductos,
+  crearProducto,
+  actualizarProducto,
+  borrarProducto,
+  listaDePedidos,
+  crearPedido,
 } = require('../controllers/product.controller');
 const { mediaDir } = require('../data/storage');
 
@@ -25,12 +25,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.get('/productos', listProducts);
-router.post('/productos/crear', authMiddleware, upload.single('imagen'), createProduct);
-router.patch('/productos/:id/actualizar', authMiddleware, upload.single('imagen'), updateProduct);
-router.delete('/productos/:id/eliminar', authMiddleware, deleteProduct);
-router.get('/pedidos', authMiddleware, listPedidos);
-router.post('/pedidos/crear', authMiddleware, createPedido);
+router.get('/productos', listaDeProductos);
+router.post('/productos/crear', authMiddleware, upload.single('imagen'), crearProducto);
+router.patch('/productos/:id/actualizar', authMiddleware, upload.single('imagen'), actualizarProducto);
+router.delete('/productos/:id/eliminar', authMiddleware, borrarProducto);
+router.get('/pedidos', authMiddleware, listaDePedidos);
+router.post('/pedidos/crear', authMiddleware, crearPedido);
 router.get('/health', (req, res) => res.json({ ok: true, service: 'node_backend' }));
 
 module.exports = router;
