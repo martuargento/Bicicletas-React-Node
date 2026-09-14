@@ -19,7 +19,7 @@ const SECRET_KEY = process.env.JWT_SECRET_KEY || 'bicileal-node-secret-dev';
 //access: dura 60 minutos
 //refresh: dura 7 días
 
-function generateTokens(user) {
+function generarToken(user) {
   const payload = { id: user.id, username: user.username, email: user.email };
 
   return {
@@ -30,7 +30,7 @@ function generateTokens(user) {
 
 
 //esta funcion verifica si el token fue firmado con la clave correcta, no esta alterado y no esta vencido
-function verifyToken(token) {
+function verificarToken(token) {
   return jwt.verify(token, SECRET_KEY);
 }
 
@@ -38,6 +38,6 @@ function verifyToken(token) {
 //aca exportamos secret_key y las dos funciones que hicimos, para que otros archivos puedan usarlos
 module.exports = {
   SECRET_KEY,
-  generateTokens,
-  verifyToken,
+  generarToken,
+  verificarToken,
 };

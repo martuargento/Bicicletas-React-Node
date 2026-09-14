@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { prisma } = require('../lib/prisma');
-const { generateTokens } = require('../data/auth');
+const { generarToken } = require('../data/auth');
 
 function serializeUser(user) {
   return {
@@ -43,7 +43,7 @@ async function registro(req, res) {
     },
   });
 
-  const tokens = generateTokens(newUser);
+  const tokens = generarToken(newUser);
 
   return res.status(201).json({
     user: serializeUser(newUser),
@@ -70,7 +70,7 @@ async function login(req, res) {
     return res.status(401).json({ error: 'Credenciales inválidas.' });
   }
 
-  const tokens = generateTokens(user);
+  const tokens = generarToken(user);
 
   return res.status(200).json({
     user: serializeUser(user),
