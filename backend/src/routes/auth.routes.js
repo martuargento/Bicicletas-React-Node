@@ -10,10 +10,14 @@ const { registro, login, perfil } = require('../controllers/auth.controller');
 //importamos el middleware que va a verificar si el token JWT es correcto
 const authMiddleware = require('../middleware/auth.middleware');
 
-//creamos un router independiente para organizar estas rutas (?)
+//creamos un router independiente para organizar estas rutas 
+//este router independiente no es otro servidor ni otra aplicacion express,
+//es como un pequeño modulo que agrupa rutas relacionadas
 const router = express.Router();
 
-//aca definimos los endpoints o las rutas de este archivo
+
+//aca definimos los endpoints o las rutas que van a quedar guardadas dentro de ese modulo
+//llamado router, que hicimos recien....
 //solamente el que tenga el middleware como segundo parametro, es una ruta protegida
 //para acceder a ese endpoint se necesita de un token valido, para el resto no es necesario
 //y cualquiera pueda hacer solicitudes a esos endpoints

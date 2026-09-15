@@ -11,13 +11,15 @@ const path = require('path');
 const authRoutes = require('../routes/auth.routes');
 const productRoutes = require('../routes/products.routes');
 
-//creamos la aplicacion express, el servidor web backend que va a escuchar peticiones http
+// Creamos la aplicación Express.
+// Acá configuramos el backend, pero el servidor empieza a escuchar
+// peticiones cuando server.js ejecuta app.listen().
 const app = express();
 
 //usamos cors y definimos que las peticiones permitidas entrantes van a ser desde el puerto 5173
 app.use(cors({
   origin: 'http://localhost:5173',
-  credentials: true,
+  credentials: true, 
 }));
 
 //usamos estos middleware (interceptores de las solicitudes)
@@ -33,8 +35,24 @@ app.use(morgan('dev'));
 //esto hace que las imagenes guardads en /media puedan ser accedidas desde el navegador
 app.use('/media', express.static(path.join(__dirname, '../../media')));
 
-//aca es una simplificacion de rutas, pero hay que investigar mejor para terminar de definir que hace
+// Conectamos los routers independientes con la aplicación principal.
+//
+// authRoutes contiene las rutas de autenticación.
+// El prefijo '/api/auth' se combina con cada ruta interna.
+//
+// Por ejemplo:
+// router.post('/login', login)
+// se convierte en:
+// POST /api/auth/login
 app.use('/api/auth', authRoutes);
+
+// productRoutes contiene las rutas de productos, pedidos y health.
+// El prefijo '/api' se combina con cada ruta interna.
+//
+// Por ejemplo:
+// router.get('/productos', listaDeProductos)
+// se convierte en:
+// GET /api/productos
 app.use('/api', productRoutes);
 
 //esta parte es un middleware de fallback para rutas inexistentes:

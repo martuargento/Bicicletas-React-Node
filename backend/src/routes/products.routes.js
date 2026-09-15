@@ -11,7 +11,7 @@ const {
   crearPedido,
 } = require('../controllers/product.controller');
 const { mediaDir } = require('../data/storage');
-
+ 
 const router = express.Router();
 
 const storage = multer.diskStorage({
