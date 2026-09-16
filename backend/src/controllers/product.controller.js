@@ -292,6 +292,12 @@ async function actualizarProducto(req, res) {
 
 
 //borrar un producto
+
+//aca lo que hacemos es:
+// llega el id del producto a borrar por la URL
+// verificamos que exista el producto a traves de su id
+// y si existe lo borramos de la base de datos
+
 async function borrarProducto(req, res) {
   const productoExistente = await prisma.producto.findUnique({
     where: { id: Number(req.params.id) },
