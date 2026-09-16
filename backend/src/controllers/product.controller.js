@@ -1,4 +1,35 @@
+// Este archivo es el controller de productos y pedidos.
+// Su trabajo es:
+
+// recibir peticiones del frontend
+// validar datos
+// consultar la base de datos con Prisma
+// devolver respuestas en JSON
+// O sea: es la parte que “piensa” y “decide” qué hacer
+// cuando el usuario quiere
+// ver, crear, editar, borrar productos o pedidos.
+
+//Importamos el cliente Prisma, que permite comunicarnos con la base de datos.
+//Gracias a prisma podemos hacer consultas como:
+// • prisma.user.findUnique(...)
+// • prisma.user.findFirst(...)
+// • prisma.user.create(...)
+
+//En este proyecto, el modelo User está definido en prisma --> schema.prisma.
+
 const { prisma } = require('../lib/prisma');
+
+
+//Esta función toma un producto “crudo” de la base de datos
+//y lo transforma en un formato que le sirve al frontend.
+// que hace:
+// agarra el producto de la base de datos y :
+// • toma solo los campos que queremos mostrar
+// • convierte precio a número con 2 decimales
+// • convierte stock a número
+// • si no hay descripción, pone string vacío
+// • si no hay imagen, pone null
+
 
 function serializeProducto(producto) {
   return {
@@ -13,8 +44,10 @@ function serializeProducto(producto) {
 }
 
 
+
+
 //obtener la lista de todos los productos
-async function listaDeProductos(req, res) {
+async function listaDeProductos(req, res) {  
   const productos = await prisma.producto.findMany({
     orderBy: { id: 'desc' },
   });
