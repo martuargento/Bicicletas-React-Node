@@ -161,6 +161,20 @@ async function crearProducto(req, res) {
 
 
 //actualizar un producto
+
+//esta funcion es para editar un producto que ya existe
+
+//La idea es:
+
+// • recibir el id del producto en la peticion
+// • buscar si ese producto existe
+// • si existe, actualizar solo lo que vino en la petición
+// • si no vino un dato, dejar el valor viejo
+// • validar que los nuevos valores sean correctos
+// • guardar cambios en la base de datos
+// • devolver el producto actualizado
+
+
 async function actualizarProducto(req, res) {
   const productoExistente = await prisma.producto.findUnique({
     where: { id: Number(req.params.id) },
