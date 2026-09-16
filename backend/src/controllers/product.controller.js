@@ -226,7 +226,14 @@ async function actualizarProducto(req, res) {
   const stock = req.body.stock !== undefined ? Number(req.body.stock) : Number(productoExistente.stock);
 
 
-  
+  //ahora que tenemos en nombre, descripcion, precio y stock
+  //los datos que vamos a terminar asignandole a ese producto a editar
+  //vamos a proceder a las validaciones de cada uno de ellos, para asegurarnos
+  //de que esten bien
+
+  //si nombre no tiene nada y esta vacio, sera null
+  //entonces entra en el if
+  //y retornamos un status 400, con el mensaje de error "el nombre es obligatorio"
   if (!nombre) {
     return res.status(400).json({
       error: 'Datos inválidos.',
@@ -234,6 +241,8 @@ async function actualizarProducto(req, res) {
     });
   }
 
+  //si precio es menor a 0
+  //retornamos un status 400, con el mensaje de error "el precio no puede ser negativo"
   if (precio < 0) {
     return res.status(400).json({
       error: 'Datos inválidos.',
@@ -241,12 +250,26 @@ async function actualizarProducto(req, res) {
     });
   }
 
+  //si el stock puesto es menor a 0
+  //retornamos un status 400, con el mensaje de error "el precio no puede ser negativo"
   if (stock < 0) {
     return res.status(400).json({
       error: 'Datos inválidos.',
       details: { stock: ['El stock no puede ser negativo.'] },
     });
   }
+
+
+  //si todas estas validaciones pasan, vamos a llegar aca
+  //ya estando seguro de que los datos son correctos
+  //asi que procedemos a hacer la actualizacion del producto
+
+  // Qué hace:
+  // where: { id: ... } = el producto a actualizar
+  // data: { ... } = los nuevos valores
+  // si viene una nueva imagen en req.file, se usa esa y se guarda en la ruta especificada
+  // si no vino imagen nueva, se deja la imagen que ya tenía
+  // Eso hace que la edición no pierda la imagen anterior si no se manda una nueva.
 
   const producto = await prisma.producto.update({
     where: { id: Number(req.params.id) },
@@ -259,8 +282,13 @@ async function actualizarProducto(req, res) {
     },
   });
 
+  //retornamos entonces como respuesta final el producto ya actualizado
+  //se lo devolvemos pasandolo por la funcion serializeProducto()
+  //para que le de el producto con los campos publicos permitidos
   return res.json(serializeProducto(producto));
 }
+
+
 
 
 //borrar un producto
