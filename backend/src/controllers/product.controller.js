@@ -30,6 +30,7 @@ const { prisma } = require('../lib/prisma');
 // • si no hay descripción, pone string vacío
 // • si no hay imagen, pone null
 
+//Esto sirve para devolver una respuesta ordenada al frontend.
 
 function serializeProducto(producto) {
   return {
@@ -44,9 +45,17 @@ function serializeProducto(producto) {
 }
 
 
-
-
 //obtener la lista de todos los productos
+
+//en esta funcion hacemos esto:
+//“Traeme todos los productos de la base de datos,
+// ordenados del más nuevo al más viejo, y devolvéselos al frontend”.
+
+// findMany() = trae muchos registros
+// orderBy: { id: 'desc' } = ordena por id de mayor a menor
+// map(serializeProducto) = convierte cada producto al formato limpio para el frontend
+// res.json(...) = responde con el producto en formato JSON
+
 async function listaDeProductos(req, res) {  
   const productos = await prisma.producto.findMany({
     orderBy: { id: 'desc' },
@@ -54,6 +63,8 @@ async function listaDeProductos(req, res) {
 
   return res.json(productos.map(serializeProducto));
 }
+
+
 
 
 //crear un producto nuevo
