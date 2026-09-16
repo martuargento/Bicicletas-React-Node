@@ -68,6 +68,11 @@ async function listaDeProductos(req, res) {
 
 
 //crear un producto nuevo
+
+//en esta funcion hacemos esto:
+//“Recibimos los datos del producto que quiere crear el usuario
+// y los convertimos a un formato válido”.
+
 async function crearProducto(req, res) {
   const nombre = String(req.body.nombre || '').trim();
   const descripcion = String(req.body.descripcion || '');
