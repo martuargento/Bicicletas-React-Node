@@ -105,11 +105,16 @@ async function registro(req, res) {
     },
   });
 
-  //me quede aca -----------------------------------------
 
+//aca hacemos una verificacion de duplicados
+//para no volver a registrar 2 veces a un mismo usuario
+//entonces verificamos si el usuario ya existe
+//en caso de existir , retornamos un status 400 con el mensaje de error
+//"este usuario ya existe"
   if (existingUser) {
     return res.status(400).json({ error: 'Ese usuario ya existe.' });
   }
+  
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = await prisma.user.create({
