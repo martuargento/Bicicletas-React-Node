@@ -166,7 +166,7 @@ async function crearProducto(req, res) {
 
 //La idea es:
 
-// • recibir el id del producto en la peticion
+// • recibir el id del producto en la URL
 // • buscar si ese producto existe
 // • si existe, actualizar solo lo que vino en la petición
 // • si no vino un dato, dejar el valor viejo
@@ -175,19 +175,58 @@ async function crearProducto(req, res) {
 // • devolver el producto actualizado
 
 async function actualizarProducto(req, res) {
+  //Buscamos si el producto existe usando el id que llega en la URL misma
+  //ejemplo:
+  //URL: /productos/12
+
+  //entonces req.params.id vale 12
+  //ese es el id del producto a actualizar
+  //asi que buscamos si existe en la tabla productos, y guardamos ese producto
+  //en productoExistente
+
+  //si no lo encuentra, productoExiste sera null
   const productoExistente = await prisma.producto.findUnique({
     where: { id: Number(req.params.id) },
   });
 
+  //si productoExiste es null, entonces entra al if
+  //y retornamos un status 404, con el mensaje de error "producto no encontrado"
   if (!productoExistente) {
     return res.status(404).json({ error: 'Producto no encontrado.' });
   }
 
+  //esta parte toma los nuevos valores del producto si los hay en la solicitud
+  //y si no los hay, deja los viejos
+
+  //Dice:
+
+  // si vino nombre en el body, lo uso
+  // si no vino, uso el nombre que ya tenía
+  // si vino precio, lo uso
+  // si no vino, dejo el precio anterior
+  // así sucesivamente
+
+  //veamos el primero como ejemplo
+  //si req.body.nombre es diferente de undefined
+  // (significa que tiene algo, que vino ese dato en la solicitud)
+  //entonces guardamos en la constante nombre, en formato texto (string), eso que vino,
+  //quitando los espacios al principio y al final si los tiene con .trim()
+
+  // en caso de que esa condicion no se cumpla, se ejecuta lo que viene despues del :
+  //que basicamente lo que hace es:
+  //guardamos en la constante nombre, productoExistente.nombre
+  //que es basicamente el nombre del producto a editar, obtenido desde la base de datos
+  //osea que le estamos poniendo en nombre, 
+  //lo mismo que tenia ya puesto en la base de datos ese producto
+
+  // y asi hacemos lo mismo con descripcion, precio, stock
   const nombre = req.body.nombre !== undefined ? String(req.body.nombre).trim() : productoExistente.nombre;
   const descripcion = req.body.descripcion !== undefined ? String(req.body.descripcion || '') : productoExistente.descripcion;
   const precio = req.body.precio !== undefined ? Number(req.body.precio) : Number(productoExistente.precio);
   const stock = req.body.stock !== undefined ? Number(req.body.stock) : Number(productoExistente.stock);
 
+
+  
   if (!nombre) {
     return res.status(400).json({
       error: 'Datos inválidos.',
