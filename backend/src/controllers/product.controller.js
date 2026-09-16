@@ -73,18 +73,39 @@ async function listaDeProductos(req, res) {
 //“Recibimos los datos del producto que quiere crear el usuario
 // y los convertimos a un formato válido”.
 
+//que hace:
+// • toma nombre, descripcion, precio, stock desde la peticion con req.body
+// • String(...) convierte todo a texto
+// • .trim() limpia espacios
+// • Number(...) convierte el precio y stock a número
+
+//asi que basicamente creamos los hooks
+//nombre, descripcion, precio, stock, y le asignamos los valores que vienen
+//en la solicitud, en el req.body
+//y dejamos en los hooks los datos listos con el formato correcto para trabajar
+//en la creacion de un nuevo producto en la base de datos
+
 async function crearProducto(req, res) {
   const nombre = String(req.body.nombre || '').trim();
   const descripcion = String(req.body.descripcion || '');
   const precio = Number(req.body.precio || 0);
   const stock = Number(req.body.stock || 0);
 
+  //aca chequeamos si nombre tiene algo, si no tiene nada
+  //hacemos un return con un status 400, con un mensaje de error diciendo
+  //"datos invalidos, el nombre es obligatorio"
   if (!nombre) {
     return res.status(400).json({
       error: 'Datos inválidos.',
       details: { nombre: ['El nombre es obligatorio.'] },
     });
   }
+
+  //ahora chequeamos que el precio no sea menor a 0
+  //hacemos entonces un if, preguntando si precio es menor a 0
+  //y en caso de cumplirse esa condicion
+  //hacemos un return con un status 400, con un mensaje de error diciendo
+  //"datos invalidos, el precio no puede ser negativo"
 
   if (precio < 0) {
     return res.status(400).json({
@@ -93,6 +114,16 @@ async function crearProducto(req, res) {
     });
   }
 
+  //ahora chequeamos que el stock no sea menor a 0
+  //recordemos que al momento de crear un producto, tambien esta el campo stock
+  //donde al dar de alta tenemos que poner cuanto de stock hay de ese producto
+  //aca vamos a evitar que se ponga un stock negativo, por ejemplo -1
+
+  //hacemos entonces un if, preguntando si el stock es menor a 0
+  //y en caso de cumplirse esa condicion
+  //hacemos un return con un status 400, con un mensaje de error diciendo
+  //"datos invalidos, el stockno puede ser negativo"
+
   if (stock < 0) {
     return res.status(400).json({
       error: 'Datos inválidos.',
@@ -100,6 +131,17 @@ async function crearProducto(req, res) {
     });
   }
 
+
+  //si esta todo bien, llegamos a esta parte del codigo
+  //aca realmente vamos a guardar ese nuevo producto en la base de datos
+
+  //lo que hace:  
+  // • crea un producto con prisma
+  // • guarda nombre, descripción, precio, stock
+  // • si llegó una imagen, la guarda en /media/bicicletas/...
+  // • si no vino una imagen (deberia estar en req.file)
+  // si no existe req.file, ejecuta lo que viene luego del :
+  // en el campo imagen guarda un null
   const producto = await prisma.producto.create({
     data: {
       nombre,
@@ -110,8 +152,12 @@ async function crearProducto(req, res) {
     },
   });
 
+  //retornamos el producto creado al frontend, en el formato limpio
+  //utilizando para eso serializeProducto()
   return res.status(201).json(serializeProducto(producto));
 }
+
+
 
 
 //actualizar un producto
