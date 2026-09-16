@@ -92,8 +92,17 @@ const storage = multer.diskStorage({
 //ahora vamos a crear el middleware de subida
 
 //Creamos una configuración de Multer usando el almacenamiento que definimos anteriormente.
+//Después podemos usar upload en las rutas que reciben imágenes, por ejemplo:
+//upload.single('imagen')
+//significa:
+//"Esta ruta espera recibir un solo archivo y el campo del formulario debe llamarse imagen.""
+//Ese nombre debe coincidir con el que usa React al enviar el archivo:
+//formData.append('imagen', archivo);
+
 const upload = multer({ storage });
 
+
+// aca definimos los endpoints para los productos y pedidos
 router.get('/productos', listaDeProductos);
 router.post('/productos/crear', authMiddleware, upload.single('imagen'), crearProducto);
 router.patch('/productos/:id/actualizar', authMiddleware, upload.single('imagen'), actualizarProducto);
