@@ -116,7 +116,22 @@ async function registro(req, res) {
   }
   
 
+//llegado a esta parte del codigo es porque pasó todas las validaciones anteriores
+
+//asi que arrancamos a crear el usuario / registrar nuevo usuario
+
+
+//Esto transforma la contraseña normal en un hash seguro.
+//ejemplo:
+//contraseña original: Riverplate912
+//hash generado: $2b$10$8x3...
+//Eso significa que la base de datos no guarda la contraseña en el texto plano original,
+//sino una versión cifrada.
+
   const hashedPassword = await bcrypt.hash(password, 10);
+
+
+//ahora que creamos el usuario en la base de datos
   const newUser = await prisma.user.create({
     data: {
       username,
@@ -127,13 +142,25 @@ async function registro(req, res) {
     },
   });
 
+//generamos un token JWT
+//con la función generarToken creamos el token que identifica al usuario logueado.
+//Ese token luego lo va a usar el frontend para saber que el usuario está autenticado.
   const tokens = generarToken(newUser);
 
+
+
+// lo siguiente hace que el backend responda con:
+
+// • 201 Created: porque se creó el usuario
+// • un objeto user con los datos del usuario creado
+// • tokens: token de acceso y refresh, generado por la funcion generarToken()
   return res.status(201).json({
     user: serializeUser(newUser),
     tokens,
   });
 }
+
+
 
 
 //loguearse
