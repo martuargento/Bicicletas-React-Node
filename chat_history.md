@@ -2198,6 +2198,379 @@ La diferencia entre ambos puertos es:
 - `8000`: backend Node/Express
 - `5173`: frontend React/Vite
 
+---
+
+## Fecha: 2026-09-16
+
+### Conversación 19
+
+#### Usuario
+
+bueno, quedo lo mas pesado a mi entender, los 2 controller. vamos con el primero:
+
+```js
+const bcrypt = require('bcryptjs');
+const { prisma } = require('../lib/prisma');
+const { generarToken } = require('../data/auth');
+
+function serializeUser(user) {
+    return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+    };
+}
+
+//registrar un nuevo usuario
+async function registro(req, res) {
+    const username = String(req.body.username || '').trim();
+    const email = String(req.body.email || '').trim();
+    const password = String(req.body.password || '');
+
+    if (!username || !email || !password) {
+        return res.status(400).json({ error: 'Completa username, email y password.' });
+    }
+
+    const existingUser = await prisma.user.findFirst({
+        where: {
+            OR: [{ username }, { email }],
+        },
+    });
+
+    if (existingUser) {
+        return res.status(400).json({ error: 'Ese usuario ya existe.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await prisma.user.create({
+        data: {
+            username,
+            email,
+            password: hashedPassword,
+            first_name: '',
+            last_name: '',
+        },
+    });
+
+    const tokens = generarToken(newUser);
+
+    return res.status(201).json({
+        user: serializeUser(newUser),
+        tokens,
+    });
+}
+
+//loguearse
+async function login(req, res) {
+    const username = String(req.body.username || '').trim();
+    const password = String(req.body.password || '');
+
+    const user = await prisma.user.findUnique({
+        where: { username },
+    });
+
+    if (!user) {
+        return res.status(401).json({ error: 'Credenciales inválidas.' });
+    }
+
+    const passwordOk = await bcrypt.compare(password, user.password);
+    if (!passwordOk) {
+        return res.status(401).json({ error: 'Credenciales inválidas.' });
+    }
+
+    const tokens = generarToken(user);
+
+    return res.status(200).json({
+        user: serializeUser(user),
+        tokens,
+    });
+}
+
+//perfil
+function perfil(req, res) {
+    return res.json(serializeUser(req.user));
+}
+
+//exportamos estas funciones para que otros archivos puedan usarlas
+module.exports = {
+    registro,
+    login,
+    perfil,
+};
+```
+
+#### Asistente
+
+Este es el controller de autenticación. Su trabajo es recibir solicitudes relacionadas con usuarios, procesarlas y devolver una respuesta.
+
+En criollo:
+
+```text
+La ruta recibe la petición
+                ↓
+el controller ejecuta la lógica
+                ↓
+consulta la base de datos si hace falta
+                ↓
+devuelve una respuesta al frontend
+```
+
+Este archivo tiene tres funciones principales: `registro` crea un usuario, `login` inicia sesión y `perfil` devuelve los datos del usuario autenticado.
+
+### Importaciones
+
+`bcrypt` trabaja con contraseñas de forma segura. No guardamos la contraseña directamente, sino un hash.
+
+`prisma` es el cliente que permite comunicarnos con la base de datos mediante operaciones como `findFirst`, `findUnique` y `create`.
+
+`generarToken` crea los tokens JWT que luego el frontend puede enviar para demostrar que el usuario está autenticado.
+
+### `serializeUser`
+
+```js
+function serializeUser(user) {
+    return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+    };
+}
+```
+
+Recibe un usuario completo y devuelve solamente los datos que pueden salir hacia el frontend. La contraseña queda afuera. `user.first_name || ''` usa una cadena vacía si el dato no existe.
+
+### `registro`
+
+Se ejecuta con `POST /api/auth/registro`. Obtiene los datos desde `req.body`:
+
+```js
+const username = String(req.body.username || '').trim();
+const email = String(req.body.email || '').trim();
+const password = String(req.body.password || '');
+```
+
+`String(...)` convierte el valor en texto, `|| ''` evita valores inexistentes y `trim()` elimina espacios externos. La contraseña no usa `trim()` porque sus espacios podrían ser válidos.
+
+Después valida que estén completos:
+
+```js
+if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Completa username, email y password.' });
+}
+```
+
+El estado `400` significa que la solicitud está incompleta o mal formada. El `return` detiene la función.
+
+Luego busca si ya existe un usuario:
+
+```js
+const existingUser = await prisma.user.findFirst({
+    where: {
+        OR: [{ username }, { email }],
+    },
+});
+```
+
+En criollo, pregunta si existe un usuario con ese username o con ese email. `await` espera la respuesta de la base de datos.
+
+```js
+if (existingUser) {
+    return res.status(400).json({ error: 'Ese usuario ya existe.' });
+}
+```
+
+Si encontró uno, detiene el registro. Además, el modelo `User` tiene `username @unique` y `email @unique`, por lo que la base de datos tampoco permite duplicados.
+
+La contraseña se transforma en hash:
+
+```js
+const hashedPassword = await bcrypt.hash(password, 10);
+```
+
+La contraseña original se usa para comprobar y el hash se guarda en la base de datos. Nunca se guarda la contraseña original.
+
+Después Prisma crea el usuario:
+
+```js
+const newUser = await prisma.user.create({
+    data: {
+        username,
+        email,
+        password: hashedPassword,
+        first_name: '',
+        last_name: '',
+    },
+});
+```
+
+Prisma devuelve el registro creado y lo guarda en `newUser`. Luego `generarToken(newUser)` crea los tokens y se responde:
+
+```js
+return res.status(201).json({
+    user: serializeUser(newUser),
+    tokens,
+});
+```
+
+El estado `201` significa que se creó correctamente un nuevo recurso. `serializeUser` evita enviar la contraseña.
+
+### `login`
+
+Se ejecuta con `POST /api/auth/login`. Su recorrido es:
+
+```text
+1. recibir username y password
+2. buscar el usuario
+3. comparar la contraseña
+4. generar tokens
+5. devolver usuario y tokens
+```
+
+Busca el usuario con:
+
+```js
+const user = await prisma.user.findUnique({
+    where: { username },
+});
+```
+
+Usamos `findUnique` porque `username` es único en Prisma. Si no existe, responde con `401` y un mensaje genérico:
+
+```js
+if (!user) {
+    return res.status(401).json({ error: 'Credenciales inválidas.' });
+}
+```
+
+El mensaje no dice si falló el usuario o la contraseña, para no revelar información innecesaria.
+
+Después compara la contraseña:
+
+```js
+const passwordOk = await bcrypt.compare(password, user.password);
+```
+
+Bcrypt no desencripta el hash. Comprueba si la contraseña recibida coincide con el hash guardado y devuelve `true` o `false`.
+
+Si no coincide:
+
+```js
+if (!passwordOk) {
+    return res.status(401).json({ error: 'Credenciales inválidas.' });
+}
+```
+
+Si todo está bien, genera tokens y responde con estado `200`:
+
+```js
+const tokens = generarToken(user);
+
+return res.status(200).json({
+    user: serializeUser(user),
+    tokens,
+});
+```
+
+### `perfil`
+
+```js
+function perfil(req, res) {
+    return res.json(serializeUser(req.user));
+}
+```
+
+Responde a `GET /api/auth/perfil`, pero la ruta está protegida:
+
+```js
+router.get('/perfil', authMiddleware, perfil);
+```
+
+Antes de ejecutar `perfil`, `authMiddleware` verifica el token, busca al usuario, guarda el resultado en `req.user` y llama a `next()`.
+
+El recorrido completo es:
+
+```text
+React solicita GET /api/auth/perfil
+                ↓
+authMiddleware verifica el token
+                ↓
+busca el usuario
+                ↓
+guarda el usuario en req.user
+                ↓
+llama a next()
+                ↓
+se ejecuta perfil
+                ↓
+se devuelve req.user
+```
+
+Por eso el controller puede usar `req.user`. `serializeUser(req.user)` devuelve solamente los datos públicos.
+
+### Exportación
+
+```js
+module.exports = {
+    registro,
+    login,
+    perfil,
+};
+```
+
+Exportamos las tres funciones para que `auth.routes.js` pueda conectarlas con sus endpoints:
+
+```js
+router.post('/registro', registro);
+router.post('/login', login);
+router.get('/perfil', authMiddleware, perfil);
+```
+
+### Resumen del archivo en criollo
+
+```text
+registro:
+    recibe los datos
+    valida que estén completos
+    comprueba que no exista el usuario
+    transforma la contraseña en hash
+    crea el usuario
+    genera tokens
+    devuelve usuario y tokens
+
+login:
+    recibe username y password
+    busca el usuario
+    compara la contraseña con el hash
+    si coincide, genera tokens
+    devuelve usuario y tokens
+
+perfil:
+    recibe un usuario que ya fue validado por authMiddleware
+    devuelve sus datos públicos
+```
+
+La diferencia principal es:
+
+```text
+registro -> crea un usuario nuevo
+login    -> comprueba las credenciales y crea una sesión mediante tokens
+perfil   -> devuelve los datos de un usuario ya autenticado
+```
+
+La idea más importante es que las rutas solamente indican qué función ejecutar, mientras que este controller contiene la lógica real de autenticación.
+
+---
+
+### Conversación 20
+
+#### Usuario
+
+actualiza el historial
+
 Los dos comandos hacen lo mismo: localizar el proceso que está escuchando en el puerto indicado y cerrarlo forzosamente. Solo se debe tener presente que el comando cierra cualquier proceso que esté usando ese puerto.
 
 ---
@@ -2291,3 +2664,17 @@ Y esta estructura es la que se usa como base moderna y profesional para aprender
 ---
 
 ## Fin del contexto histórico y de proyecto
+
+---
+
+## Fecha: 2026-09-16
+
+### Conversación 21
+
+#### Usuario
+
+actualiza el historial
+
+#### Asistente
+
+Se agregó al historial la conversación completa sobre `auth.controller.js`, incluyendo el código del controller y la explicación de `serializeUser`, `registro`, `login`, `perfil`, Prisma, bcrypt, JWT, `req.user` y la exportación de las funciones.
