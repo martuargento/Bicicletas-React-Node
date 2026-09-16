@@ -174,7 +174,6 @@ async function crearProducto(req, res) {
 // • guardar cambios en la base de datos
 // • devolver el producto actualizado
 
-
 async function actualizarProducto(req, res) {
   const productoExistente = await prisma.producto.findUnique({
     where: { id: Number(req.params.id) },
