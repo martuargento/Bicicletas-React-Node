@@ -303,24 +303,58 @@ async function borrarProducto(req, res) {
     where: { id: Number(req.params.id) },
   });
 
+  //si el id del producto no existe en la base de datos,
+  //retornamos un status 404, con el mensaje de error "producto no encontrado"
   if (!productoExistente) {
     return res.status(404).json({ error: 'Producto no encontrado.' });
   }
 
+  //en caso de llegar aca, es porque el id del producto si se encontro
+  //en la base de datos
+  //asi que borramos el producto que tenga ese id
   await prisma.producto.delete({
     where: { id: Number(req.params.id) },
   });
 
+  //devolvemos un status 200, con el mensaje "producto eliminado"
   return res.status(200).json({ mensaje: 'Producto eliminado.' });
 }
 
 
 //obtener la lista de todos los pedidos
+
+//esta funcion sirve para obtener
+//todos los pedidos del usuario que está logueado.
+
+//La idea es:
+
+// • leer el usuario actual desde req.user.id
+// recordemos que para que exista req.user
+// tuvo que pasar primero por middleware --> auth.middleware.js
+// osea que ya se verifico que el usuario este bien logueado y con un token valido
+// recien ahi el middleware pone los datos del usuario en req.user
+// luego:
+// • buscamos en la tabla pedido todos los pedidos de ese usuario
+// • los ordenarlos del más reciente al más viejo
+// • los devolvemos en un formato limpio para el frontend
+
 async function listaDePedidos(req, res) {
+  //Buscamos los pedidos del usuario logueado
+  //Esto hace una consulta a Prisma:
+
+  // findMany() = trae muchos registros
+  // where: { usuarioId: req.user.id } = solo los pedidos del usuario actual
+  // orderBy: { id: 'desc' } = los ordena desde el más nuevo al más viejo
+  // O sea: “traeme todos los pedidos de este usuario, ordenados por id descendente”.
+
   const pedidos = await prisma.pedido.findMany({
     where: { usuarioId: req.user.id },
     orderBy: { id: 'desc' },
   });
+
+  //aca transformamos cada pedido antes de devolverlo
+  //Esto recorre cada pedido encontrado para ese usuario con .map()
+  //y devuelve un objeto más limpio.
 
   return res.json(pedidos.map((pedido) => ({
     id: pedido.id,
@@ -331,14 +365,52 @@ async function listaDePedidos(req, res) {
 }
 
 
+  // en resumen:
+
+  // toma el usuario autenticado desde req.user.id
+  // consulta sus pedidos
+  // los ordena
+  // devuelve solo la info útil para el frontend
+
+
+  // ----------
+
+
+
+
 //crear un pedido nuevo
+
+// Esta función crea un nuevo pedido para el usuario que ya está autenticado.
+//
 async function crearPedido(req, res) {
+  //Tomamos el total que viene en el body
+  //lo convertimos en numero y lo guardamos en total
+
+  //si viene vacío o undefined, usa 0
+
+  //Ejemplo:
+
+  // si manda 1500 → total = 1500
+  // si manda undefined → total = 0
+
   const total = Number(req.body.total || 0);
 
+
+  //validamos que el total no sea negativo
   if (total < 0) {
+    //si el total es negativo entra retornamos un status 400,
+    //con el mensaje de error "el total no puede ser negativo"
     return res.status(400).json({ error: 'El total no puede ser negativo.' });
   }
 
+  //aca creamos el pedido en la base de datos
+
+  //aca hacemos lo principal:
+
+  // • usuarioId: req.user.id → asociamos el pedido con el usuario autenticado
+  // usuarioId es un campo de la tabla pedidos, ahi guardamos el id del usuario
+  // que hizo el pedido
+  // • total: Number(total) → guardamos el total como número
   const pedido = await prisma.pedido.create({
     data: {
       usuarioId: req.user.id,
@@ -346,6 +418,8 @@ async function crearPedido(req, res) {
     },
   });
 
+  //ahora repondemos con el pedido creado
+  //lo hacemos con un status 201, y el json limpio del pedido creado
   return res.status(201).json({
     id: pedido.id,
     usuario: pedido.usuarioId,
@@ -355,7 +429,21 @@ async function crearPedido(req, res) {
 }
 
 
+  // en resumen:
+
+  // • recibe el total del pedido
+  // • valida que el total sea válido
+  // • crea un registro en la tabla pedido
+  //   asignando en el campo usuarioId, el id del usuario autenticado
+  // • devuelve el pedido creado
+
+
+  // ----------
+
+
 //exportamos estas funciones para que otros archivos puedan usarlas
+//en este caso seran usadas por routes --> products.routes.js
+
 module.exports = {
   listaDeProductos,
   crearProducto,

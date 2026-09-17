@@ -284,6 +284,7 @@ function perfil(req, res) {
 
 
 //exportamos estas funciones para que otros archivos puedan usarlas
+//en este caso seran usadas por routes --> auth.routes.js
 module.exports = {
   registro,
   login,
