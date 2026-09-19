@@ -11,6 +11,7 @@
 
 //importamos la funcion que verifica un token JWT (Jason Web Token)
 //esta funcion revisa si el token fue firmado con la clave correcta, si fue alterado y si esta vencido
+//la habiamos hecho antes  en data --> auth.js
 const { verificarToken } = require('../data/auth');
 
 //importamos prisma para buscar al usuario en la base de datos

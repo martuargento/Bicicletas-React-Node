@@ -14,7 +14,7 @@ const path = require('path');
 const mediaDir = path.join(__dirname, '../../media/bicicletas');
 
 
-//aca creamos la carpeta si no existe, (en este caso crearia media/bicicletas)
+//aca creamos la carpeta si es que no existe, (en este caso crearia media/bicicletas)
 //si la carpeta ya existe no pasa nada porque usamos recursive: true y evita ese error
 fs.mkdirSync(mediaDir, { recursive: true });
 
