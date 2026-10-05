@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Encabezado from '../components/Encabezado'
+import Header from '../components/Header'
 import { crearProducto, eliminarProducto, obtenerErrorApi, obtenerProductos } from '../api/products'
 import { useAuth } from '../hooks/useAuth'
 
@@ -77,7 +77,7 @@ export default function Dashboard() {
 
   return (
     <div className="pagina-tiempo-real dashboard-page">
-      <Encabezado />
+      <Header />
 
       <div className="dashboard-shell">
         <div className="dashboard-topbar">

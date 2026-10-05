@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Encabezado from '../components/Encabezado'
+import Header from '../components/Header'
 import { obtenerErrorApi, obtenerProductos, actualizarProducto } from '../api/products'
 
 const emptyForm = { nombre: '', descripcion: '', precio: '', stock: '' }
@@ -73,7 +73,7 @@ export default function EditarProducto() {
 
   return (
     <div className="pagina-tiempo-real dashboard-page">
-      <Encabezado />
+      <Header />
 
       <div className="dashboard-shell edit-shell">
         <div className="dashboard-panel">

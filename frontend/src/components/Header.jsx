@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-export default function Encabezado({ paginaActiva, children }) {
+export default function Header({ paginaActiva, children }) {
   return (
     <header className="site-header">
       <div id="logo">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import Encabezado from '../components/Encabezado'
-import { resolveMediaUrl } from '../api/client'
+import Header from '../components/Header'
+import { resolverUrlMultimedia } from '../api/client'
 import { useValorDolar } from '../hooks/useValorDolar'
 import { obtenerErrorApi, obtenerProductos } from '../api/products'
 import { useCarritoStore } from '../store/carritoStore'
@@ -44,7 +44,7 @@ export default function Tienda() {
 
   return (
     <div className="pagina-tiempo-real">
-      <Encabezado paginaActiva="productos">
+      <Header paginaActiva="productos">
         <div className="contenedor-carrito">
           <div className="contenedor-carrito-icono" onClick={() => setMenuOpen((valor) => !valor)}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="icono-carrito">
@@ -92,7 +92,7 @@ export default function Tienda() {
             )}
           </div>
         </div>
-      </Encabezado>
+      </Header>
 
       <main className="contenedor-productos-ofrecidos container-main">
         {cargandoProductos ? (
@@ -108,7 +108,7 @@ export default function Tienda() {
             return (
               <div className="item" key={producto.id}>
                 <figure>
-                  <img src={producto.imagen ? resolveMediaUrl(producto.imagen) : IMAGEN_FALLBACK} alt={producto.nombre} className="imagen" />
+                  <img src={producto.imagen ? resolverUrlMultimedia(producto.imagen) : IMAGEN_FALLBACK} alt={producto.nombre} className="imagen" />
                   <div className="superposicion" />
                 </figure>
 

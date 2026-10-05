@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Encabezado from '../components/Encabezado'
+import Header from '../components/Header'
 import { contactoSchema } from '../utils/validaciones'
 
 const initialForm = {
@@ -26,7 +26,7 @@ export default function Contactanos() {
 
   return (
     <div className="pagina-tiempo-real">
-      <Encabezado paginaActiva="contacto" />
+      <Header paginaActiva="contacto" />
 
       <div className="page-shell contact-page">
         <div className="page-card">

@@ -1,9 +1,9 @@
-import Encabezado from '../components/Encabezado'
+import Header from '../components/Header'
 
 export default function NuestraHistoria() {
   return (
     <div className="pagina-tiempo-real">
-      <Encabezado paginaActiva="historia" />
+      <Header paginaActiva="historia" />
 
       <section className="content historia-page">
         <h1 className="nuestrahistoriah1">Nuestra Historia</h1>

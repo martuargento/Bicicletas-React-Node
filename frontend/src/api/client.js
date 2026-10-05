@@ -9,13 +9,13 @@ const api = axios.create({
   },
 })
 
-export function resolveMediaUrl(path) {
-  if (!path) return ''
+export function resolverUrlMultimedia(ruta) {
+  if (!ruta) return ''
 
   try {
-    return new URL(path, `${API_BASE_URL || window.location.origin}/`).href
+    return new URL(ruta, `${API_BASE_URL || window.location.origin}/`).href
   } catch {
-    return path
+    return ruta
   }
 }
 
