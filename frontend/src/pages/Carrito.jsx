@@ -1,19 +1,15 @@
 import { Link } from 'react-router-dom'
-import { useMemo } from 'react'
-import { useExchangeRate } from '../hooks/useExchangeRate'
-import { useCartStore } from '../store/cartStore'
+import { useValorDolar } from '../hooks/useValorDolar'
+import { useCarritoStore } from '../store/carritoStore'
 
 export default function Carrito() {
-  const carrito = useCartStore((state) => state.items)
-  const removeItem = useCartStore((state) => state.removeItem)
-  const clear = useCartStore((state) => state.clear)
-  const { data: cotizacion = 1100 } = useExchangeRate()
+  const carrito = useCarritoStore((estado) => estado.items)
+  const quitarDelCarrito = useCarritoStore((estado) => estado.quitarDelCarrito)
+  const vaciarCarrito = useCarritoStore((estado) => estado.vaciarCarrito)
+  const cotizacion = useValorDolar()
 
-  const totalAr = useMemo(
-    () => carrito.reduce((sum, item) => sum + Number(item.precio || 0) * Number(item.cantidad || 0), 0),
-    [carrito]
-  )
-  const totalUsd = useMemo(() => Math.round(totalAr / (cotizacion || 1)), [totalAr, cotizacion])
+  const totalAr = carrito.reduce((sum, item) => sum + Number(item.precio || 0) * Number(item.cantidad || 0), 0)
+  const totalUsd = Math.round(totalAr / (cotizacion || 1))
 
   return (
     <div className="pagina-tiempo-real">
@@ -60,7 +56,7 @@ export default function Carrito() {
                       <span>$ {Number(item.precio * item.cantidad).toLocaleString('es-AR')}</span>
                       <span>USD {Math.round((item.precio * item.cantidad) / (cotizacion || 1))}</span>
                     </div>
-                    <button type="button" className="quit-btn" onClick={() => removeItem(item.id)}>Quitar</button>
+                    <button type="button" className="quit-btn" onClick={() => quitarDelCarrito(item.id)}>Quitar</button>
                   </div>
                 ))}
               </div>
@@ -72,7 +68,7 @@ export default function Carrito() {
               </div>
 
               <div className="carrito-actions">
-                <button type="button" className="submit-btn" onClick={clear}>Vaciar carrito</button>
+                <button type="button" className="submit-btn" onClick={vaciarCarrito}>Vaciar carrito</button>
                 <Link to="/" className="submit-btn secondary">Seguir comprando</Link>
               </div>
             </>

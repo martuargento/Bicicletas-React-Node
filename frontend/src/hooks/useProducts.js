@@ -1,35 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createProduct, deleteProduct, getProducts, updateProduct } from '../api/products'
+import { crearProducto, eliminarProducto, obtenerProductos, actualizarProducto } from '../api/products'
 
-const productQueryKey = ['products']
+const claveConsultaProductos = ['productos']
 
-export function useProducts() {
-  return useQuery({ queryKey: productQueryKey, queryFn: getProducts })
+export function useProductos() {
+  return useQuery({ queryKey: claveConsultaProductos, queryFn: obtenerProductos })
 }
 
-export function useCreateProduct() {
+export function useCrearProducto() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: createProduct,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: productQueryKey }),
+    mutationFn: crearProducto,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: claveConsultaProductos }),
   })
 }
 
-export function useUpdateProduct() {
+export function useActualizarProducto() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: updateProduct,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: productQueryKey }),
+    mutationFn: actualizarProducto,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: claveConsultaProductos }),
   })
 }
 
-export function useDeleteProduct() {
+export function useEliminarProducto() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: deleteProduct,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: productQueryKey }),
+    mutationFn: eliminarProducto,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: claveConsultaProductos }),
   })
 }

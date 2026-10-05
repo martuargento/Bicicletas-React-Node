@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../hooks/useAuth'
-import { loginSchema, registerSchema } from '../utils/validation'
+import { loginSchema, registroSchema } from '../utils/validaciones'
 
 export default function Login() {
   const { login, register: createAccount } = useAuth()
   const navigate = useNavigate()
   const [isRegister, setIsRegister] = useState(false)
   const [error, setError] = useState('')
-  const schema = isRegister ? registerSchema : loginSchema
+  const esquema = isRegister ? registroSchema : loginSchema
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(esquema),
     defaultValues: { username: '', email: '', password: '' },
   })
 

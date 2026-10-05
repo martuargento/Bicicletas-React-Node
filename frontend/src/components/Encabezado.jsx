@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-export default function SiteHeader({ activePage, children }) {
+export default function Encabezado({ paginaActiva, children }) {
   return (
     <header className="site-header">
       <div id="logo">
@@ -11,9 +11,9 @@ export default function SiteHeader({ activePage, children }) {
 
       <div className="secciones">
         <ul>
-          <li className={activePage === 'products' ? 'active' : ''}><Link to="/">Productos</Link></li>
-          <li className={activePage === 'story' ? 'active' : ''}><Link to="/nuestra-historia">Nuestra historia</Link></li>
-          <li className={activePage === 'contact' ? 'active' : ''}><Link to="/contactanos">Contáctenos</Link></li>
+          <li className={paginaActiva === 'productos' ? 'active' : ''}><Link to="/">Productos</Link></li>
+          <li className={paginaActiva === 'historia' ? 'active' : ''}><Link to="/nuestra-historia">Nuestra historia</Link></li>
+          <li className={paginaActiva === 'contacto' ? 'active' : ''}><Link to="/contactanos">Contáctenos</Link></li>
         </ul>
       </div>
 

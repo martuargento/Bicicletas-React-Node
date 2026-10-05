@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
-import SiteHeader from '../components/SiteHeader'
+import { useEffect, useState } from 'react'
+import Encabezado from '../components/Encabezado'
 import { resolveMediaUrl } from '../api/client'
-import { useExchangeRate } from '../hooks/useExchangeRate'
-import { useProducts } from '../hooks/useProducts'
-import { useCartStore } from '../store/cartStore'
+import { useValorDolar } from '../hooks/useValorDolar'
+import { obtenerErrorApi, obtenerProductos } from '../api/products'
+import { useCarritoStore } from '../store/carritoStore'
 
 const IMAGEN_FALLBACK = 'https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=900&q=80'
 
@@ -11,25 +11,32 @@ const formatNumber = (value) => Number(value || 0)
 
 export default function Tienda() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const { data: productos = [], isPending: cargandoProductos, isError: errorProductos } = useProducts()
-  const { data: cotizacion = 1100 } = useExchangeRate()
-  const carrito = useCartStore((state) => state.items)
-  const addItem = useCartStore((state) => state.addItem)
-  const removeItem = useCartStore((state) => state.removeItem)
-  const clear = useCartStore((state) => state.clear)
+  const [productos, setProductos] = useState([])
+  const [cargandoProductos, setCargandoProductos] = useState(true)
+  const [errorProductos, setErrorProductos] = useState('')
+  const cotizacion = useValorDolar()
+  const carrito = useCarritoStore((estado) => estado.items)
+  const agregarAlCarrito = useCarritoStore((estado) => estado.agregarAlCarrito)
+  const quitarDelCarrito = useCarritoStore((estado) => estado.quitarDelCarrito)
+  const vaciarCarrito = useCarritoStore((estado) => estado.vaciarCarrito)
 
-  const totalItems = useMemo(
-    () => carrito.reduce((sum, item) => sum + Number(item.cantidad || 0), 0),
-    [carrito]
-  )
-  const totalAr = useMemo(
-    () => carrito.reduce((sum, item) => sum + Number(item.precio || 0) * Number(item.cantidad || 0), 0),
-    [carrito]
-  )
-  const totalUsd = useMemo(() => Math.round(totalAr / (cotizacion || 1)), [totalAr, cotizacion])
+  useEffect(() => {
+    let active = true
 
-  const addToCart = (producto) => {
-    addItem(producto)
+    obtenerProductos()
+      .then((data) => { if (active) setProductos(data) })
+      .catch((error) => { if (active) setErrorProductos(obtenerErrorApi(error, 'No se pudieron cargar los productos.')) })
+      .finally(() => { if (active) setCargandoProductos(false) })
+
+    return () => { active = false }
+  }, [])
+
+  const totalItems = carrito.reduce((sum, item) => sum + Number(item.cantidad || 0), 0)
+  const totalAr = carrito.reduce((sum, item) => sum + Number(item.precio || 0) * Number(item.cantidad || 0), 0)
+  const totalUsd = Math.round(totalAr / (cotizacion || 1))
+
+  const agregarProductoAlCarrito = (producto) => {
+    agregarAlCarrito(producto)
     setMenuOpen(true)
   }
 
@@ -37,7 +44,7 @@ export default function Tienda() {
 
   return (
     <div className="pagina-tiempo-real">
-      <SiteHeader activePage="products">
+      <Encabezado paginaActiva="productos">
         <div className="contenedor-carrito">
           <div className="contenedor-carrito-icono" onClick={() => setMenuOpen((valor) => !valor)}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="icono-carrito">
@@ -63,7 +70,7 @@ export default function Tienda() {
                         <span className="precio-producto-seleccionado-usd">USD {Math.round((item.precio * item.cantidad) / (cotizacion || 1))}</span>
                       </div>
                     </div>
-                    <svg onClick={() => removeItem(item.id)} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="icono-cerrar">
+                    <svg onClick={() => quitarDelCarrito(item.id)} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="icono-cerrar">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
@@ -79,19 +86,19 @@ export default function Tienda() {
                   <span className="total-pagar-usd">USD {totalUsd}</span>
                 </div>
                 <div className="comprar">
-                  <button className="boton-comprar" onClick={clear}>Comprar</button>
+                  <button className="boton-comprar" onClick={vaciarCarrito}>Comprar</button>
                 </div>
               </>
             )}
           </div>
         </div>
-      </SiteHeader>
+      </Encabezado>
 
       <main className="contenedor-productos-ofrecidos container-main">
         {cargandoProductos ? (
           <div className="empty-state">Cargando productos...</div>
         ) : errorProductos ? (
-          <div className="empty-state" role="alert">No se pudieron cargar los productos. Revisá VITE_API_URL y la conexión con el backend.</div>
+          <div className="empty-state" role="alert">{errorProductos}</div>
         ) : productos.length === 0 ? (
           <div className="empty-state">No hay productos cargados todavía.</div>
         ) : (
@@ -111,7 +118,7 @@ export default function Tienda() {
                     <p className="precio">{formatearPrecio(producto.precio)}</p>
                     <p className="precio_usd">USD {precioUsd}</p>
                   </div>
-                  <button className="btn-agregar-carrito" onClick={() => addToCart(producto)}>
+                  <button className="btn-agregar-carrito" onClick={() => agregarProductoAlCarrito(producto)}>
                     Añadir al carrito
                   </button>
                 </div>

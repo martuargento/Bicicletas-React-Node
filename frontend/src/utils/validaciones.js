@@ -5,25 +5,25 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'La contraseña es obligatoria.'),
 })
 
-export const registerSchema = loginSchema.extend({
+export const registroSchema = loginSchema.extend({
   email: z.string().trim().email('Ingresá un email válido.'),
 })
 
-const numberField = (label) => z.string()
+const campoNumerico = (etiqueta) => z.string()
   .trim()
-  .min(1, `${label} es obligatorio.`)
-  .refine((value) => Number.isFinite(Number(value)), `${label} debe ser un número válido.`)
+  .min(1, `${etiqueta} es obligatorio.`)
+  .refine((valor) => Number.isFinite(Number(valor)), `${etiqueta} debe ser un número válido.`)
   .transform(Number)
-  .pipe(z.number().min(0, `${label} no puede ser negativo.`))
+  .pipe(z.number().min(0, `${etiqueta} no puede ser negativo.`))
 
-export const productSchema = z.object({
+export const productoSchema = z.object({
   nombre: z.string().trim().min(1, 'El nombre es obligatorio.'),
   descripcion: z.string(),
-  precio: numberField('El precio'),
-  stock: numberField('El stock').pipe(z.number().int('El stock debe ser un número entero.')),
+  precio: campoNumerico('El precio'),
+  stock: campoNumerico('El stock').pipe(z.number().int('El stock debe ser un número entero.')),
 })
 
-export const contactSchema = z.object({
+export const contactoSchema = z.object({
   nombre: z.string().trim().min(1, 'El nombre es obligatorio.'),
   apellido: z.string().trim().min(1, 'El apellido es obligatorio.'),
   email: z.string().trim().email('Ingresá un email válido.'),

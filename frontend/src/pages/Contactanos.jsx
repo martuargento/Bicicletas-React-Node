@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import SiteHeader from '../components/SiteHeader'
-import { contactSchema } from '../utils/validation'
+import Encabezado from '../components/Encabezado'
+import { contactoSchema } from '../utils/validaciones'
 
 const initialForm = {
   nombre: '',
@@ -15,7 +15,7 @@ const initialForm = {
 export default function Contactanos() {
   const [enviado, setEnviado] = useState(false)
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(contactoSchema),
     defaultValues: initialForm,
   })
 
@@ -26,7 +26,7 @@ export default function Contactanos() {
 
   return (
     <div className="pagina-tiempo-real">
-      <SiteHeader activePage="contact" />
+      <Encabezado paginaActiva="contacto" />
 
       <div className="page-shell contact-page">
         <div className="page-card">

@@ -1,6 +1,6 @@
 import api from './client'
 
-async function createSession(data) {
+async function crearSesion(data) {
   const access = data.tokens?.access || data.access
   const refresh = data.tokens?.refresh || data.refresh
 
@@ -19,17 +19,17 @@ async function createSession(data) {
 
 export async function login(username, password) {
   const { data } = await api.post('/auth/login/', { username, password })
-  return createSession(data)
+  return crearSesion(data)
 }
 
-export async function register(username, email, password) {
+export async function registro(username, email, password) {
   const { data } = await api.post('/auth/registro/', { username, email, password })
 
-  if (data.tokens?.access || data.access) return createSession(data)
+  if (data.tokens?.access || data.access) return crearSesion(data)
   return login(username, password)
 }
 
-export async function getProfile() {
+export async function cargarPerfil() {
   const { data } = await api.get('/auth/perfil/')
   return data.user || data
 }

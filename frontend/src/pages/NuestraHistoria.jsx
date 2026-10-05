@@ -1,9 +1,9 @@
-import SiteHeader from '../components/SiteHeader'
+import Encabezado from '../components/Encabezado'
 
 export default function NuestraHistoria() {
   return (
     <div className="pagina-tiempo-real">
-      <SiteHeader activePage="story" />
+      <Encabezado paginaActiva="historia" />
 
       <section className="content historia-page">
         <h1 className="nuestrahistoriah1">Nuestra Historia</h1>

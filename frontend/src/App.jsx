@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Login from './pages/Login'
-import ProtectedRoute from './routes/ProtectedRoute'
+import RutaProtegida from './routes/RutaProtegida'
 import Tienda from './pages/Tienda'
 import Dashboard from './pages/Dashboard'
 import EditarProducto from './pages/EditarProducto'
@@ -22,18 +22,18 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <RutaProtegida>
               <Dashboard />
-            </ProtectedRoute>
+            </RutaProtegida>
           }
         />
 
         <Route
           path="/editar/:id"
           element={
-            <ProtectedRoute>
+            <RutaProtegida>
               <EditarProducto />
-            </ProtectedRoute>
+            </RutaProtegida>
           }
         />
       </Routes>
