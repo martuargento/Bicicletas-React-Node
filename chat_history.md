@@ -270,6 +270,23 @@ Y como vos ya sabés el concepto general, en el próximo paso te lo explico a ni
 
 ---
 
+## Punto de partida guardado: 2026-10-04
+
+Antes de las modificaciones al frontend, el proyecto se encuentra así:
+
+- El frontend está en `frontend/`, usa React 18, Vite 5, React Router 6 y Axios.
+- Las páginas están en `frontend/src/pages/`; autenticación en `context/AuthContext.jsx`; rutas protegidas en `routes/ProtectedRoute.jsx`; el cliente Axios está en `api/client.js`.
+- Existen carpetas vacías para componentes y utilidades. El carrito y los formularios mantienen su lógica dentro de páginas.
+- `api/client.js` fija `http://localhost:8000/api`; `Tienda.jsx` también fija `http://localhost:8000` para imágenes.
+- El frontend espera login/registro bajo `/auth/...`, perfil bajo `/auth/perfil/` y CRUD de productos bajo `/productos/...`.
+- El backend presente en este workspace es Node/Express, escucha por defecto en el puerto 8000 y publica esos recursos bajo `/api`. No hay código Django presente en este workspace.
+- En el momento del checkpoint, Git mostraba cambios locales en `frontend/src/App.jsx`, eliminaciones de los antiguos archivos de página/contexto/API en la raíz de `src`, nuevas carpetas `api`, `context`, `hooks`, `pages` y `routes`, y una eliminación local de `backend/src/data/seed.js`. Estos cambios se preservan; no se debe revertir ni modificar el backend.
+- `frontend/package.json` tenía Axios, React y React Router como dependencias; el build de Vite ya se había ejecutado previamente con éxito.
+
+Este checkpoint registra el estado y los cambios locales visibles antes de continuar. El trabajo autorizado en esta etapa es exclusivamente en `frontend/`. La aplicación debe poder configurarse para apuntar tanto al backend Node actual como a un backend Django que ofrezca el mismo contrato de API, sin editar código de ninguno de los dos backends.
+
+---
+
 ## Fecha: 2026-09-13
 
 ### Conversación 9

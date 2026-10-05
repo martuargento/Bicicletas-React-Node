@@ -1,13 +1,13 @@
 import { Route, Routes } from 'react-router-dom'
-import { AuthProvider } from './AuthContext'
-import Login from './Login'
-import RutaProtegida from './RutaProtegida'
-import Tienda from './Tienda'
-import Dashboard from './Dashboard'
-import EditarProducto from './EditarProducto'
-import NuestraHistoria from './NuestraHistoria'
-import Contactanos from './Contactanos'
-import Carrito from './Carrito'
+import { AuthProvider } from './context/AuthContext'
+import Login from './pages/Login'
+import ProtectedRoute from './routes/ProtectedRoute'
+import Tienda from './pages/Tienda'
+import Dashboard from './pages/Dashboard'
+import EditarProducto from './pages/EditarProducto'
+import NuestraHistoria from './pages/NuestraHistoria'
+import Contactanos from './pages/Contactanos'
+import Carrito from './pages/Carrito'
 
 export default function App() {
   return (
@@ -22,18 +22,18 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            <RutaProtegida>
+            <ProtectedRoute>
               <Dashboard />
-            </RutaProtegida>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/editar/:id"
           element={
-            <RutaProtegida>
+            <ProtectedRoute>
               <EditarProducto />
-            </RutaProtegida>
+            </ProtectedRoute>
           }
         />
       </Routes>
