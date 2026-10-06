@@ -5,6 +5,7 @@ export default function RutaProtegida({ children }) {
   const { user, loading, token, errorPerfil, reintentarPerfil } = useAuth()
   const location = useLocation()
 
+  
   if (loading) {
     return <div className="container">Cargando...</div>
   }
@@ -22,6 +23,7 @@ export default function RutaProtegida({ children }) {
     )
   }
 
+  
   return (
     <>
       {errorPerfil && (
