@@ -1,13 +1,13 @@
 import { Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Login from './pages/Login'
-import RutaProtegida from './routes/RutaProtegida'
 import Tienda from './pages/Tienda'
 import Dashboard from './pages/Dashboard'
 import EditarProducto from './pages/EditarProducto'
 import NuestraHistoria from './pages/NuestraHistoria'
 import Contactanos from './pages/Contactanos'
 import Carrito from './pages/Carrito'
+import RutaProtegida from './routes/RutaProtegida'
 
 export default function App() {
   return (
