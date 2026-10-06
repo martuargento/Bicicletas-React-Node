@@ -3,9 +3,11 @@ import { crearProducto, eliminarProducto, obtenerProductos, actualizarProducto }
 
 const claveConsultaProductos = ['productos']
 
+
 export function useProductos() {
   return useQuery({ queryKey: claveConsultaProductos, queryFn: obtenerProductos })
 }
+
 
 export function useCrearProducto() {
   const queryClient = useQueryClient()
@@ -16,6 +18,7 @@ export function useCrearProducto() {
   })
 }
 
+
 export function useActualizarProducto() {
   const queryClient = useQueryClient()
 
@@ -24,6 +27,7 @@ export function useActualizarProducto() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: claveConsultaProductos }),
   })
 }
+
 
 export function useEliminarProducto() {
   const queryClient = useQueryClient()

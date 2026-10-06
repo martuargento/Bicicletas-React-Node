@@ -11,6 +11,7 @@ const IMAGEN_FALLBACK = 'https://images.unsplash.com/photo-1541625602330-2277a4c
 
 const formatNumber = (value) => Number(value || 0)
 
+
 export default function Tienda() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { data: productos = [], isPending: cargandoProductos, error: errorCarga } = useProductos()
@@ -35,6 +36,7 @@ export default function Tienda() {
     return `USD ${Math.round(formatNumber(valor) / cotizacion).toLocaleString('es-AR')}`
   }
 
+  
   return (
     <div className="pagina-tiempo-real">
       <Header paginaActiva="productos">

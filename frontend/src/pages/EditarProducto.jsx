@@ -7,7 +7,8 @@ import { obtenerErrorApi } from '../api/products'
 import { useActualizarProducto, useProductos } from '../hooks/useProducts'
 import { productoSchema } from '../utils/validaciones'
 
-const emptyForm = { nombre: '', descripcion: '', precio: '', stock: '' }
+const valoresInicialesProducto = { nombre: '', descripcion: '', precio: '', stock: '' }
+
 
 export default function EditarProducto() {
   const { id } = useParams()
@@ -19,7 +20,7 @@ export default function EditarProducto() {
   const [errorAccion, setErrorAccion] = useState('')
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm({
     resolver: zodResolver(productoSchema),
-    defaultValues: emptyForm,
+    defaultValues: valoresInicialesProducto,
   })
 
   useEffect(() => {
@@ -31,6 +32,8 @@ export default function EditarProducto() {
       stock: String(producto.stock ?? ''),
     })
   }, [producto, reset, isDirty])
+
+
 
   const guardarCambios = async (datosProducto) => {
     setErrorAccion('')
@@ -50,10 +53,13 @@ export default function EditarProducto() {
     }
   }
 
+
   const mensajeErrorCarga = errorCarga
     ? obtenerErrorApi(errorCarga, 'No se pudo cargar el producto.')
     : ''
 
+
+    
   return (
     <div className="pagina-tiempo-real dashboard-page">
       <Header />

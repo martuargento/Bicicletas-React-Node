@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Header from '../components/Header'
 import { contactoSchema } from '../utils/validaciones'
 
-const initialForm = {
+const valoresInicialesFormulario = {
   nombre: '',
   apellido: '',
   email: '',
@@ -16,12 +16,12 @@ export default function Contactanos() {
   const [enviado, setEnviado] = useState(false)
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(contactoSchema),
-    defaultValues: initialForm,
+    defaultValues: valoresInicialesFormulario,
   })
 
   const onSubmit = () => {
     setEnviado(true)
-    reset(initialForm)
+    reset(valoresInicialesFormulario)
   }
 
   return (
@@ -73,7 +73,7 @@ export default function Contactanos() {
             </div>
 
             <button type="submit" className="submit-btn">Enviar</button>
-            <button type="button" className="submit-btn secondary" onClick={() => { reset(initialForm); setEnviado(false) }}>Borrar</button>
+            <button type="button" className="submit-btn secondary" onClick={() => { reset(valoresInicialesFormulario); setEnviado(false) }}>Borrar</button>
             {enviado && <p className="success-msg">Tu mensaje fue enviado correctamente.</p>}
           </form>
 

@@ -24,6 +24,7 @@ export default function Carrito() {
     return `USD ${Math.round(valor / cotizacion).toLocaleString('es-AR')}`
   }
 
+
   const confirmarPedido = async () => {
     if (cargandoSesion || carrito.length === 0) return
 
@@ -44,6 +45,7 @@ export default function Carrito() {
     }
   }
 
+  
   return (
     <div className="pagina-tiempo-real">
       <Header />

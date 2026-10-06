@@ -10,6 +10,7 @@ import { productoSchema } from '../utils/validaciones'
 
 const initialForm = { nombre: '', descripcion: '', precio: '', stock: '' }
 
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
@@ -23,6 +24,7 @@ export default function Dashboard() {
     resolver: zodResolver(productoSchema),
     defaultValues: initialForm,
   })
+
 
   const guardarProducto = async (datosProducto) => {
     setErrorAccion('')
@@ -44,6 +46,7 @@ export default function Dashboard() {
     }
   }
 
+
   const eliminarProductoDelPanel = async (id) => {
     setErrorAccion('')
     try {
@@ -62,6 +65,7 @@ export default function Dashboard() {
     navigate('/login')
   }
 
+  
   return (
     <div className="pagina-tiempo-real dashboard-page">
       <Header />

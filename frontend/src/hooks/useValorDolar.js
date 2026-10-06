@@ -18,6 +18,7 @@ export function useValorDolar() {
     staleTime: 15 * 60 * 1000,
   })
 
+  
   return {
     valor: consulta.data ?? null,
     cargando: consulta.isPending,
