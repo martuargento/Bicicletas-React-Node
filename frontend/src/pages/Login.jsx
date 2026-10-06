@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { loginSchema, registroSchema } from '../utils/validaciones'
 
 export default function Login() {
-  const { login, register: createAccount } = useAuth()
+  const { login, registro: crearCuenta } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [isRegister, setIsRegister] = useState(false)
@@ -22,7 +22,7 @@ export default function Login() {
 
     try {
       if (isRegister) {
-        await createAccount(form.username, form.email, form.password)
+        await crearCuenta(form.username, form.email, form.password)
       } else {
         await login(form.username, form.password)
       }
