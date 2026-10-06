@@ -3,34 +3,60 @@ import { cargarPerfil, login as requestLogin, registro as requestRegistro } from
 
 export const AuthContext = createContext(null)
 
+function recuperarUsuarioGuardado() {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null')
+  } catch {
+    return null
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(recuperarUsuarioGuardado)
   const [token, setToken] = useState(() => localStorage.getItem('access_token'))
   const [loading, setLoading] = useState(true)
+  const [errorPerfil, setErrorPerfil] = useState('')
+  const [intentoValidacion, setIntentoValidacion] = useState(0)
 
   useEffect(() => {
+    let activo = true
+
     const cargar = async () => {
       if (!token) {
         setUser(null)
+        setErrorPerfil('')
         setLoading(false)
         return
       }
 
+      setLoading(true)
+      setErrorPerfil('')
+
       try {
-        setUser(await cargarPerfil())
+        const usuario = await cargarPerfil()
+        if (!activo) return
+        setUser(usuario)
+        localStorage.setItem('user', JSON.stringify(usuario))
       } catch (error) {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        localStorage.removeItem('user')
-        setUser(null)
-        setToken(null)
+        if (!activo) return
+
+        if (error.response?.status === 401) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          localStorage.removeItem('user')
+          setUser(null)
+          setToken(null)
+        } else {
+          setErrorPerfil('No pudimos verificar la sesión con el servidor. Conservamos la sesión local; podés reintentar.')
+        }
       } finally {
-        setLoading(false)
+        if (activo) setLoading(false)
       }
     }
 
     cargar()
-  }, [token])
+    return () => { activo = false }
+  }, [token, intentoValidacion])
 
   const login = async (username, password) => {
     const session = await requestLogin(username, password)
@@ -54,7 +80,18 @@ export function AuthProvider({ children }) {
     setToken(null)
   }
 
-  const value = useMemo(() => ({ user, token, loading, login, registro, logout }), [user, token, loading])
+  const reintentarPerfil = () => setIntentoValidacion((intento) => intento + 1)
+
+  const value = useMemo(() => ({
+    user,
+    token,
+    loading,
+    errorPerfil,
+    login,
+    registro,
+    logout,
+    reintentarPerfil,
+  }), [user, token, loading, errorPerfil])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
