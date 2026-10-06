@@ -11,6 +11,7 @@ function recuperarUsuarioGuardado() {
   }
 }
 
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(recuperarUsuarioGuardado)
   const [token, setToken] = useState(() => localStorage.getItem('access_token'))
@@ -58,6 +59,8 @@ export function AuthProvider({ children }) {
     return () => { activo = false }
   }, [token, intentoValidacion])
 
+
+
   const login = async (username, password) => {
     const session = await requestLogin(username, password)
     setToken(session.access)
@@ -65,12 +68,15 @@ export function AuthProvider({ children }) {
     return session
   }
 
+
   const registro = async (username, email, password) => {
     const session = await requestRegistro(username, email, password)
     setToken(session.access)
     setUser(session.user)
     return session
   }
+
+
 
   const logout = () => {
     localStorage.removeItem('access_token')
@@ -80,8 +86,10 @@ export function AuthProvider({ children }) {
     setToken(null)
   }
 
+
   const reintentarPerfil = () => setIntentoValidacion((intento) => intento + 1)
 
+  
   const value = useMemo(() => ({
     user,
     token,
