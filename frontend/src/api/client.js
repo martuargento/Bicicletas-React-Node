@@ -6,6 +6,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 })
 
+
 export function resolverUrlMultimedia(ruta) {
   if (!ruta) return ''
 
@@ -15,6 +16,7 @@ export function resolverUrlMultimedia(ruta) {
     return ruta
   }
 }
+
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
@@ -28,6 +30,7 @@ api.interceptors.request.use((config) => {
 
   return config
 })
+
 
 api.interceptors.response.use(
   (response) => response,
