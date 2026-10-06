@@ -17,10 +17,12 @@ async function crearSesion(data) {
   return { user, access, refresh }
 }
 
+
 export async function login(username, password) {
   const { data } = await api.post('/auth/login/', { username, password })
   return crearSesion(data)
 }
+
 
 export async function registro(username, email, password) {
   const { data } = await api.post('/auth/registro/', { username, email, password })
@@ -28,6 +30,7 @@ export async function registro(username, email, password) {
   if (data.tokens?.access || data.access) return crearSesion(data)
   return login(username, password)
 }
+
 
 export async function cargarPerfil() {
   const { data } = await api.get('/auth/perfil/')
