@@ -150,7 +150,18 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
+}
+
+.contenedor-carrito-icono:focus-visible,
+.boton-quitar-carrito:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
 }
 
 .icono-carrito {
@@ -254,7 +265,21 @@ a {
 
 .icono-cerrar:hover {
   stroke: red;
+}
+
+.boton-quitar-carrito {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
+}
+
+.boton-quitar-carrito:hover .icono-cerrar {
+  stroke: red;
 }
 
 .carrito-vacio {
@@ -615,6 +640,11 @@ a {
   border-radius: 10px;
   background: #fff;
   padding: 0 12px;
+}
+
+.dashboard-form > small[role="alert"] {
+  grid-column: 1 / -1;
+  color: #b42318;
 }
 
 .file-upload {

@@ -1,46 +1,62 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import Header from '../components/Header'
+import { obtenerErrorApi } from '../api/products'
+import { useAuth } from '../hooks/useAuth'
+import { useCrearPedido } from '../hooks/usePedidos'
 import { useValorDolar } from '../hooks/useValorDolar'
 import { useCarritoStore } from '../store/carritoStore'
 
 export default function Carrito() {
+  const navigate = useNavigate()
+  const { user, token, loading: cargandoSesion } = useAuth()
   const carrito = useCarritoStore((estado) => estado.items)
   const quitarDelCarrito = useCarritoStore((estado) => estado.quitarDelCarrito)
   const vaciarCarrito = useCarritoStore((estado) => estado.vaciarCarrito)
-  const cotizacion = useValorDolar()
+  const mutacionCrearPedido = useCrearPedido()
+  const { valor: cotizacion, cargando: cargandoCotizacion } = useValorDolar()
+  const [mensajePedido, setMensajePedido] = useState('')
+  const [errorPedido, setErrorPedido] = useState('')
 
   const totalAr = carrito.reduce((sum, item) => sum + Number(item.precio || 0) * Number(item.cantidad || 0), 0)
-  const totalUsd = Math.round(totalAr / (cotizacion || 1))
+  const formatearPrecioDolares = (valor) => {
+    if (!cotizacion) return cargandoCotizacion ? 'Cargando cotización...' : 'Cotización no disponible'
+    return `USD ${Math.round(valor / cotizacion).toLocaleString('es-AR')}`
+  }
+
+  const confirmarPedido = async () => {
+    if (cargandoSesion || carrito.length === 0) return
+
+    if (!user || !token) {
+      navigate('/login', { state: { from: { pathname: '/carrito' } } })
+      return
+    }
+
+    setErrorPedido('')
+    setMensajePedido('')
+
+    try {
+      const pedido = await mutacionCrearPedido.mutateAsync(Number(totalAr.toFixed(2)))
+      vaciarCarrito()
+      setMensajePedido(`El pedido #${pedido.id} se registró correctamente.`)
+    } catch (error) {
+      setErrorPedido(obtenerErrorApi(error, 'No se pudo registrar el pedido.'))
+    }
+  }
 
   return (
     <div className="pagina-tiempo-real">
-      <header className="site-header">
-        <div id="logo">
-          <Link to="/">
-            <img src="/Logoheader.jpg" alt="Logo Bicileal" />
-          </Link>
-        </div>
-
-        <div className="secciones">
-          <ul>
-            <li><Link to="/">Productos</Link></li>
-            <li><Link to="/nuestra-historia">Nuestra historia</Link></li>
-            <li><Link to="/contactanos">Contáctenos</Link></li>
-          </ul>
-        </div>
-
-        <div className="redes-principal">
-          <a href="https://www.instagram.com" target="_blank" rel="noreferrer"><img src="/icons/instagram.svg" alt="Instagram" /></a>
-          <a href="https://www.facebook.com" target="_blank" rel="noreferrer"><img src="/icons/facebook.svg" alt="Facebook" /></a>
-        </div>
-      </header>
+      <Header />
 
       <div className="page-shell">
         <div className="page-card carrito-page">
           <h1>Carrito</h1>
 
+          {mensajePedido && <p role="status">{mensajePedido}</p>}
+          {errorPedido && <p role="alert">{errorPedido}</p>}
           {carrito.length === 0 ? (
             <>
-              <p>Aún no agregaste productos.</p>
+              {!mensajePedido && <p>Aún no agregaste productos.</p>}
               <Link to="/" className="link-volver">Volver a la tienda</Link>
             </>
           ) : (
@@ -54,7 +70,7 @@ export default function Carrito() {
                     </div>
                     <div className="carrito-item-precio">
                       <span>$ {Number(item.precio * item.cantidad).toLocaleString('es-AR')}</span>
-                      <span>USD {Math.round((item.precio * item.cantidad) / (cotizacion || 1))}</span>
+                      <span>{formatearPrecioDolares(item.precio * item.cantidad)}</span>
                     </div>
                     <button type="button" className="quit-btn" onClick={() => quitarDelCarrito(item.id)}>Quitar</button>
                   </div>
@@ -64,11 +80,14 @@ export default function Carrito() {
               <div className="carrito-total-final">
                 <h3>Total</h3>
                 <p>$ {totalAr.toLocaleString('es-AR')}</p>
-                <p>USD {totalUsd}</p>
+                <p>{formatearPrecioDolares(totalAr)}</p>
               </div>
 
               <div className="carrito-actions">
                 <button type="button" className="submit-btn" onClick={vaciarCarrito}>Vaciar carrito</button>
+                <button type="button" className="submit-btn" onClick={confirmarPedido} disabled={cargandoSesion || mutacionCrearPedido.isPending}>
+                  {mutacionCrearPedido.isPending ? 'Registrando pedido...' : user ? 'Confirmar pedido' : 'Iniciar sesión para comprar'}
+                </button>
                 <Link to="/" className="submit-btn secondary">Seguir comprando</Link>
               </div>
             </>

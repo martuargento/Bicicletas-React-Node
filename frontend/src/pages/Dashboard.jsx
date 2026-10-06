@@ -1,74 +1,61 @@
-import { useEffect, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Header from '../components/Header'
-import { crearProducto, eliminarProducto, obtenerErrorApi, obtenerProductos } from '../api/products'
+import { obtenerErrorApi } from '../api/products'
+import { useCrearProducto, useEliminarProducto, useProductos } from '../hooks/useProducts'
 import { useAuth } from '../hooks/useAuth'
+import { productoSchema } from '../utils/validaciones'
 
 const initialForm = { nombre: '', descripcion: '', precio: '', stock: '' }
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-  const [productos, setProductos] = useState([])
-  const [form, setForm] = useState(initialForm)
+  const { data: productos = [], isPending: cargandoProductos, error: errorCarga } = useProductos()
+  const mutacionCrear = useCrearProducto()
+  const mutacionEliminar = useEliminarProducto()
   const [imagen, setImagen] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [errorAccion, setErrorAccion] = useState('')
+  const inputImagenRef = useRef(null)
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    resolver: zodResolver(productoSchema),
+    defaultValues: initialForm,
+  })
 
-  const cargarProductos = async () => {
-    setError('')
-    try {
-      setProductos(await obtenerProductos())
-    } catch (requestError) {
-      setError(obtenerErrorApi(requestError, 'No se pudieron cargar los productos.'))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    cargarProductos()
-  }, [])
-
-  const handleChange = (event) => {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
-  }
-
-  const handleSubmitProduct = async (event) => {
-    event.preventDefault()
-    setError('')
-    setSaving(true)
+  const guardarProducto = async (datosProducto) => {
+    setErrorAccion('')
 
     try {
       const formData = new FormData()
-      Object.entries(form).forEach(([name, value]) => formData.append(name, value))
+      Object.entries(datosProducto).forEach(([nombre, valor]) => formData.append(nombre, valor))
 
       if (imagen) {
         formData.append('imagen', imagen)
       }
 
-      await crearProducto(formData)
-      setForm(initialForm)
+      await mutacionCrear.mutateAsync(formData)
+      reset(initialForm)
       setImagen(null)
-      event.currentTarget.reset()
-      await cargarProductos()
+      if (inputImagenRef.current) inputImagenRef.current.value = ''
     } catch (error) {
-      setError(obtenerErrorApi(error, 'No se pudo guardar el producto.'))
-    } finally {
-      setSaving(false)
+      setErrorAccion(obtenerErrorApi(error, 'No se pudo guardar el producto.'))
     }
   }
 
-  const handleDelete = async (id) => {
+  const eliminarProductoDelPanel = async (id) => {
+    setErrorAccion('')
     try {
-      setError('')
-      await eliminarProducto(id)
-      await cargarProductos()
+      await mutacionEliminar.mutateAsync(id)
     } catch (error) {
-      setError(obtenerErrorApi(error, 'No se pudo eliminar el producto.'))
+      setErrorAccion(obtenerErrorApi(error, 'No se pudo eliminar el producto.'))
     }
   }
+
+  const mensajeErrorCarga = errorCarga
+    ? obtenerErrorApi(errorCarga, 'No se pudieron cargar los productos.')
+    : ''
 
   const handleLogout = () => {
     logout()
@@ -92,25 +79,30 @@ export default function Dashboard() {
 
         <section className="dashboard-panel">
           <h2>Agregar producto</h2>
-          <form onSubmit={handleSubmitProduct} className="dashboard-form">
-            <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre" required />
-            <input name="descripcion" value={form.descripcion} onChange={handleChange} placeholder="Descripción" />
-            <input name="precio" type="number" min="0" step="0.01" value={form.precio} onChange={handleChange} placeholder="Precio" required />
-            <input name="stock" type="number" min="0" step="1" value={form.stock} onChange={handleChange} placeholder="Stock" required />
+          <form onSubmit={handleSubmit(guardarProducto)} className="dashboard-form">
+            <input {...register('nombre')} placeholder="Nombre" />
+            {errors.nombre && <small role="alert">{errors.nombre.message}</small>}
+            <input {...register('descripcion')} placeholder="Descripción" />
+            <input {...register('precio')} type="number" min="0" step="0.01" placeholder="Precio" />
+            {errors.precio && <small role="alert">{errors.precio.message}</small>}
+            <input {...register('stock')} type="number" min="0" step="1" placeholder="Stock" />
+            {errors.stock && <small role="alert">{errors.stock.message}</small>}
             <label className="file-upload">
               <span>Seleccionar archivo</span>
-              <input name="imagen" type="file" accept="image/*" onChange={(e) => setImagen(e.target.files[0] || null)} />
+              <input ref={inputImagenRef} name="imagen" type="file" accept="image/*" onChange={(evento) => setImagen(evento.target.files[0] || null)} />
             </label>
-            <button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+            <button type="submit" disabled={mutacionCrear.isPending}>{mutacionCrear.isPending ? 'Guardando...' : 'Guardar'}</button>
           </form>
-          {error && <p role="alert">{error}</p>}
+          {errorAccion && <p role="alert">{errorAccion}</p>}
         </section>
 
         <section className="dashboard-products">
           <h2>Productos</h2>
-          {loading && <p>Cargando productos...</p>}
+          {cargandoProductos && <p>Cargando productos...</p>}
+          {mensajeErrorCarga && <p role="alert">{mensajeErrorCarga}</p>}
+          {!cargandoProductos && !mensajeErrorCarga && productos.length === 0 && <p>No hay productos cargados todavía.</p>}
           <div className="dashboard-grid">
-            {productos.map((producto) => (
+            {!mensajeErrorCarga && productos.map((producto) => (
               <article key={producto.id} className="dashboard-card">
                 <h3>{producto.nombre}</h3>
                 <p className="muted">{producto.descripcion || 'Sin descripción'}</p>
@@ -118,7 +110,7 @@ export default function Dashboard() {
                 <p><strong>Stock:</strong> {producto.stock}</p>
                 <div className="dashboard-actions">
                   <button type="button" className="dashboard-edit" onClick={() => navigate(`/editar/${producto.id}`)}>Editar</button>
-                  <button type="button" className="dashboard-delete" onClick={() => handleDelete(producto.id)}>Eliminar</button>
+                  <button type="button" className="dashboard-delete" disabled={mutacionEliminar.isPending} onClick={() => eliminarProductoDelPanel(producto.id)}>Eliminar</button>
                 </div>
               </article>
             ))}

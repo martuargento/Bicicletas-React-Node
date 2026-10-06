@@ -1,22 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 export function useValorDolar() {
-  const [valor, setValor] = useState(1100)
+  const consulta = useQuery({
+    queryKey: ['cotizacion', 'dolar', 'oficial'],
+    queryFn: async () => {
+      const respuesta = await fetch('https://api.bluelytics.com.ar/v2/latest')
+      if (!respuesta.ok) throw new Error('No se pudo cargar la cotización del dólar.')
 
-  useEffect(() => {
-    const cargarValor = async () => {
-      try {
-        const respuesta = await fetch('https://api.bluelytics.com.ar/v2/latest')
-        if (!respuesta.ok) return
-        const data = await respuesta.json()
-        if (data?.oficial?.value_sell) setValor(data.oficial.value_sell)
-      } catch {
-        setValor(1100)
+      const datos = await respuesta.json()
+      const valorDolar = Number(datos?.oficial?.value_sell)
+      if (!Number.isFinite(valorDolar) || valorDolar <= 0) {
+        throw new Error('La cotización recibida no es válida.')
       }
-    }
 
-    cargarValor()
-  }, [])
+      return valorDolar
+    },
+    staleTime: 15 * 60 * 1000,
+  })
 
-  return valor
+  return {
+    valor: consulta.data ?? null,
+    cargando: consulta.isPending,
+  }
 }

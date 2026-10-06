@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../hooks/useAuth'
@@ -8,6 +8,7 @@ import { loginSchema, registroSchema } from '../utils/validaciones'
 export default function Login() {
   const { login, register: createAccount } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [isRegister, setIsRegister] = useState(false)
   const [error, setError] = useState('')
   const esquema = isRegister ? registroSchema : loginSchema
@@ -25,7 +26,11 @@ export default function Login() {
       } else {
         await login(form.username, form.password)
       }
-      navigate('/dashboard')
+      const destino = location.state?.from
+      const rutaDestino = destino?.pathname
+        ? `${destino.pathname}${destino.search || ''}${destino.hash || ''}`
+        : '/dashboard'
+      navigate(rutaDestino, { replace: true })
     } catch (err) {
       setError(err.response?.data?.error || err.response?.data?.detail || err.message || 'No se pudo iniciar sesión.')
     }
