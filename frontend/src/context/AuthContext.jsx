@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { cargarPerfil, login as requestLogin, registro as requestRegistro } from '../api/auth'
+import { cargarPerfil, login as peticionLogin, registro as peticionRegistro } from '../api/auth'
 
 export const AuthContext = createContext(null)
 
@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
 
 
   const login = async (username, password) => {
-    const session = await requestLogin(username, password)
+    const session = await peticionLogin(username, password)
     setToken(session.access)
     setUser(session.user)
     return session
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
 
 
   const registro = async (username, email, password) => {
-    const session = await requestRegistro(username, email, password)
+    const session = await peticionRegistro(username, email, password)
     setToken(session.access)
     setUser(session.user)
     return session
