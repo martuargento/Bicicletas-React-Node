@@ -13,7 +13,7 @@ export default function Carrito() {
   const carrito = useCarritoStore((estado) => estado.items)
   const quitarDelCarrito = useCarritoStore((estado) => estado.quitarDelCarrito)
   const vaciarCarrito = useCarritoStore((estado) => estado.vaciarCarrito)
-  const mutacionCrearPedido = useCrearPedido()
+  const crearPedidoMutation = useCrearPedido()
   const { valor: cotizacion, cargando: cargandoCotizacion } = useValorDolar()
   const [mensajePedido, setMensajePedido] = useState('')
   const [errorPedido, setErrorPedido] = useState('')
@@ -37,7 +37,7 @@ export default function Carrito() {
     setMensajePedido('')
 
     try {
-      const pedido = await mutacionCrearPedido.mutateAsync(Number(totalAr.toFixed(2)))
+      const pedido = await crearPedidoMutation.mutateAsync(Number(totalAr.toFixed(2)))
       vaciarCarrito()
       setMensajePedido(`El pedido #${pedido.id} se registró correctamente.`)
     } catch (error) {
@@ -87,8 +87,8 @@ export default function Carrito() {
 
               <div className="carrito-actions">
                 <button type="button" className="submit-btn" onClick={vaciarCarrito}>Vaciar carrito</button>
-                <button type="button" className="submit-btn" onClick={confirmarPedido} disabled={cargandoSesion || mutacionCrearPedido.isPending}>
-                  {mutacionCrearPedido.isPending ? 'Registrando pedido...' : user ? 'Confirmar pedido' : 'Iniciar sesión para comprar'}
+                <button type="button" className="submit-btn" onClick={confirmarPedido} disabled={cargandoSesion || crearPedidoMutation.isPending}>
+                  {crearPedidoMutation.isPending ? 'Registrando pedido...' : user ? 'Confirmar pedido' : 'Iniciar sesión para comprar'}
                 </button>
                 <Link to="/" className="submit-btn secondary">Seguir comprando</Link>
               </div>

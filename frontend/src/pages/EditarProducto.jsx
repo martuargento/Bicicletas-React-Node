@@ -15,7 +15,7 @@ export default function EditarProducto() {
   const navigate = useNavigate()
   const { data: productos = [], isPending: cargandoProductos, error: errorCarga } = useProductos()
   const producto = productos.find((item) => String(item.id) === String(id))
-  const mutacionActualizar = useActualizarProducto()
+  const actualizarProductoMutation = useActualizarProducto()
   const [imagen, setImagen] = useState(null)
   const [errorAccion, setErrorAccion] = useState('')
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm({
@@ -46,7 +46,7 @@ export default function EditarProducto() {
         formData.append('imagen', imagen)
       }
 
-      await mutacionActualizar.mutateAsync({ id, formData })
+      await actualizarProductoMutation.mutateAsync({ id, formData })
       navigate('/dashboard')
     } catch (requestError) {
       setErrorAccion(obtenerErrorApi(requestError, 'No se pudo actualizar el producto.'))
@@ -85,7 +85,7 @@ export default function EditarProducto() {
               </label>
               {errorAccion && <p role="alert">{errorAccion}</p>}
               <div className="dashboard-actions edit-buttons">
-                <button type="submit" disabled={mutacionActualizar.isPending}>{mutacionActualizar.isPending ? 'Guardando...' : 'Guardar cambios'}</button>
+                <button type="submit" disabled={actualizarProductoMutation.isPending}>{actualizarProductoMutation.isPending ? 'Guardando...' : 'Guardar cambios'}</button>
                 <button type="button" className="dashboard-delete" onClick={() => navigate('/dashboard')}>Cancelar</button>
               </div>
             </form>

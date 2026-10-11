@@ -15,8 +15,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { data: productos = [], isPending: cargandoProductos, error: errorCarga } = useProductos()
-  const mutacionCrear = useCrearProducto()
-  const mutacionEliminar = useEliminarProducto()
+  const crearProductoMutation = useCrearProducto()
+  const eliminarProductoMutation = useEliminarProducto()
   const [imagen, setImagen] = useState(null)
   const [errorAccion, setErrorAccion] = useState('')
   const inputImagenRef = useRef(null)
@@ -37,7 +37,7 @@ export default function Dashboard() {
         formData.append('imagen', imagen)
       }
 
-      await mutacionCrear.mutateAsync(formData)
+      await crearProductoMutation.mutateAsync(formData)
       reset(initialForm)
       setImagen(null)
       if (inputImagenRef.current) inputImagenRef.current.value = ''
@@ -50,7 +50,7 @@ export default function Dashboard() {
   const eliminarProductoDelPanel = async (id) => {
     setErrorAccion('')
     try {
-      await mutacionEliminar.mutateAsync(id)
+      await eliminarProductoMutation.mutateAsync(id)
     } catch (error) {
       setErrorAccion(obtenerErrorApi(error, 'No se pudo eliminar el producto.'))
     }
@@ -95,7 +95,7 @@ export default function Dashboard() {
               <span>Seleccionar archivo</span>
               <input ref={inputImagenRef} name="imagen" type="file" accept="image/*" onChange={(evento) => setImagen(evento.target.files[0] || null)} />
             </label>
-            <button type="submit" disabled={mutacionCrear.isPending}>{mutacionCrear.isPending ? 'Guardando...' : 'Guardar'}</button>
+            <button type="submit" disabled={crearProductoMutation.isPending}>{crearProductoMutation.isPending ? 'Guardando...' : 'Guardar'}</button>
           </form>
           {errorAccion && <p role="alert">{errorAccion}</p>}
         </section>
@@ -114,7 +114,7 @@ export default function Dashboard() {
                 <p><strong>Stock:</strong> {producto.stock}</p>
                 <div className="dashboard-actions">
                   <button type="button" className="dashboard-edit" onClick={() => navigate(`/editar/${producto.id}`)}>Editar</button>
-                  <button type="button" className="dashboard-delete" disabled={mutacionEliminar.isPending} onClick={() => eliminarProductoDelPanel(producto.id)}>Eliminar</button>
+                  <button type="button" className="dashboard-delete" disabled={eliminarProductoMutation.isPending} onClick={() => eliminarProductoDelPanel(producto.id)}>Eliminar</button>
                 </div>
               </article>
             ))}
