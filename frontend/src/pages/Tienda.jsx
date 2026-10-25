@@ -31,12 +31,13 @@ export default function Tienda() {
   }
 
   const formatearPrecio = (valor) => `$${formatNumber(valor).toLocaleString('es-AR')}`
+
   const formatearPrecioDolares = (valor) => {
     if (!cotizacion) return cargandoCotizacion ? 'Cargando cotización...' : 'Cotización no disponible'
     return `USD ${Math.round(formatNumber(valor) / cotizacion).toLocaleString('es-AR')}`
   }
 
-  
+
   return (
     <div className="pagina-tiempo-real">
       <Header paginaActiva="productos">
