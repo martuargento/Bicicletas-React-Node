@@ -3,9 +3,9 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 function recuperarCarritoLocalStorage() {
   try {
-    const saved = JSON.parse(localStorage.getItem('bicicleal-cart') || 'null')
-    if (Array.isArray(saved)) return saved
-    return Array.isArray(saved?.state?.items) ? saved.state.items : []
+    const carritoGuardado = JSON.parse(localStorage.getItem('bicicleal-cart') || 'null')
+    if (Array.isArray(carritoGuardado)) return carritoGuardado
+    return Array.isArray(carritoGuardado?.state?.items) ? carritoGuardado.state.items : []
   } catch {
     return []
   }
